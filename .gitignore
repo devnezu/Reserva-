@@ -1,4 +1,4 @@
-# Dependencias e cache dos gerenciadores
+# Dependencias e cache do gerenciador
 node_modules/
 .npm/
 .yarn/cache/
