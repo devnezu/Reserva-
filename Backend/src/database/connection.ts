@@ -8,3 +8,7 @@ export const database = new Database(path)
 database.pragma('journal_mode = WAL')
 database.pragma('foreign_keys = ON')
 database.pragma('busy_timeout = 5000')
+
+// Busca sem diferenciar maiúsculas nem acentos: "Vitória", "vitoria" e "VIT" encontram o mesmo título.
+export const foldText = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036F]/g, '').toLowerCase()
+database.function('fold', { deterministic: true }, (value: unknown) => (typeof value === 'string' ? foldText(value) : value))

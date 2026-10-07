@@ -132,6 +132,11 @@ test('Dynamic events, money, RBAC and banners', async (suite) => {
     assert.deepEqual([...first.items, ...second.items].map((row) => row.id), all.items.slice(0, 4).map((row) => row.id))
     assert.ok(all.items.findIndex((item) => item.id === event.id) < all.items.findIndex((item) => item.id === twin.id))
     assert.equal((await list('?q=100%25_')).total, 1)
+    const accented = await create({ ...base, title: 'Noite da Vitória' })
+    for (const term of ['Vitória', 'vitoria', 'VITORIA', 'vit', 'oria', 'VITÓRIA']) {
+      assert.deepEqual((await list(`?q=${encodeURIComponent(term)}`, true)).items.map((row) => row.id), [accented.id], term)
+    }
+    assert.equal((await request(`/api/events/${accented.id}`, 'DELETE', undefined, admin.cookie)).status, 204)
     assert.equal((await list('?genre=football')).total, 2)
     for (const query of ['?page=0', '?pageSize=51', '?page=1.5', '?genre=nope']) assert.equal((await request('/api/events' + query)).status, 400)
     for (const cents of [1000, 2000, 3450]) {

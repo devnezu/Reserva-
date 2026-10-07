@@ -1,4 +1,4 @@
-import { database } from '../../database/connection.js'
+import { database, foldText } from '../../database/connection.js'
 import { randomUUID } from 'node:crypto'
 import type { EventInput, EventGenre } from './schemas.js'
 interface EventRow {
@@ -24,7 +24,7 @@ export const eventsRepository = {
     const where = ['archived_at IS NULL']
     const params: (string | number)[] = []
     if (!manage) { where.push('published = 1 AND starts_at > ? AND expires_at > ?'); params.push(Date.now(), Date.now()) }
-    if (query.q) { where.push("title LIKE ? ESCAPE '\\'"); params.push(`%${query.q.replace(/[\\%_]/g, '\\$&')}%`) }
+    if (query.q) { where.push("fold(title) LIKE ? ESCAPE '\\'"); params.push(`%${foldText(query.q).replace(/[\\%_]/g, '\\$&')}%`) }
     if (query.genre) { where.push('genre = ?'); params.push(query.genre) }
     const filter = where.join(' AND ')
     const total = (database.prepare(`SELECT COUNT(*) AS total FROM events WHERE ${filter}`).get(...params) as { total: number }).total
