@@ -17,7 +17,7 @@ export default function Account() {
     { label: 'E-mail', value: user?.email, icon: Mail01Icon, wide: true },
   ]
   return (
-    <AccountLayout active={section} title={section === 'dados' ? <>Seus <span className="text-[#ED1C24]">dados</span></> : <>Seus <span className="text-[#ED1C24]">ingressos</span></>}>
+    <AccountLayout active={section} hideTitleOnMobile title={section === 'dados' ? <>Seus <span className="text-[#ED1C24]">dados</span></> : <>Seus <span className="text-[#ED1C24]">ingressos</span></>}>
       {section === 'dados' && (
       <section id="seus-dados" aria-label="Seus dados" className="scroll-mt-6 rounded-3xl border border-black/10 bg-white p-6 sm:p-8 [&>div:first-child]:mt-0">
         <ProfilePhoto />

@@ -61,13 +61,14 @@ export function EventFilters({ search, genre, onSearch, onGenre, categories = 'c
         <HugeiconsIcon icon={Search01Icon} size={20} aria-hidden="true" className="pointer-events-none absolute top-1/2 left-6 z-10 -translate-y-1/2 text-neutral-500" />
         <Input id={searchId} type="search" value={search} onChange={(e) => onSearch(e.target.value)} maxLength={160} placeholder="Busque um evento" className="h-14 rounded-full border-black/10 bg-white pr-6 pl-14 text-base font-semibold shadow-none placeholder:font-normal placeholder:text-neutral-500 focus-visible:border-[#ED1C24] focus-visible:ring-[#ED1C24] md:text-base" />
       </div>
-      {categories === 'select' ? <GenreSelect genre={genre} onGenre={onGenre} /> : (
-      <div role="group" aria-label="Filtrar por categoria" className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 lg:justify-end">
+      {categories === 'select' ? <GenreSelect genre={genre} onGenre={onGenre} /> : (<>
+      <div className="md:hidden"><GenreSelect genre={genre} onGenre={onGenre} /></div>
+      <div role="group" aria-label="Filtrar por categoria" className="hidden flex-wrap gap-2 md:flex lg:justify-end">
         {GENRE_OPTIONS.map(([value, title]) => (
           <button key={value || 'all'} type="button" aria-pressed={genre === value} onClick={() => onGenre(value)} className={cn('h-11 shrink-0 rounded-full px-5 text-sm font-bold tracking-wide uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ED1C24]', genre === value ? 'bg-[#ED1C24] text-white shadow-lg shadow-[#ED1C24]/30' : 'border border-black/10 bg-white text-[#111111] hover:border-[#ED1C24] hover:text-[#ED1C24]')}>{title}</button>
         ))}
       </div>
-      )}
+      </>)}
     </div>
   )
 }
