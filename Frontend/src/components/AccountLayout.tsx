@@ -23,8 +23,8 @@ const SECTIONS = [
 // No desktop o menu é uma barra lateral à esquerda; no celular e no tablet abre pelo botão hambúrguer ao lado da logo.
 // O título fica sempre no mesmo lugar, logo abaixo do caminho; `action` ocupa o canto direito da mesma linha.
 // `trail` é o nome de uma página dentro da seção (ex.: "Sua reserva"): a seção vira link no caminho e `trail` fecha a trilha.
-// `hideTitleOnMobile` esconde o título abaixo do desktop, onde o caminho já diz em que tela a pessoa está.
-export default function AccountLayout({ active, title, action, trail, hideTitleOnMobile = false, children }: { active: AccountSection; title: ReactNode; action?: ReactNode; trail?: string; hideTitleOnMobile?: boolean; children: ReactNode }) {
+// `hideTitleOnMobile` esconde o título abaixo do desktop, onde o caminho já diz em que tela a pessoa está; `hideTitle` esconde sempre.
+export default function AccountLayout({ active, title, action, trail, hideTitleOnMobile = false, hideTitle = false, children }: { active: AccountSection; title: ReactNode; action?: ReactNode; trail?: string; hideTitleOnMobile?: boolean; hideTitle?: boolean; children: ReactNode }) {
   const { user, logout } = useAuth()
   const [busy, setBusy] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -103,7 +103,7 @@ export default function AccountLayout({ active, title, action, trail, hideTitleO
 
         <main className="min-w-0 space-y-6 lg:space-y-8">
           <div className="hidden lg:block">{crumbs}</div>
-          <div className={cn('flex min-h-12 flex-wrap items-center justify-between gap-x-6 gap-y-4', hideTitleOnMobile && 'max-lg:sr-only')}>
+          <div className={cn('flex min-h-12 flex-wrap items-center justify-between gap-x-6 gap-y-4', hideTitle ? 'sr-only' : hideTitleOnMobile && 'max-lg:sr-only')}>
             <h1 className="text-3xl leading-none font-extrabold tracking-[-0.03em] uppercase sm:text-4xl">{title}</h1>
             {action}
           </div>
