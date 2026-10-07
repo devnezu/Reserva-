@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router'
 import { useCallback, useState } from 'react'
 import { Preloader } from '@/components/preloader'
+import { PageTransition } from '@/components/page-transition'
 import HelloWorld from './pages/HelloWorld'
 import Home from './pages/Home'
 import Access from './pages/Access'
@@ -11,13 +12,13 @@ export default function App() {
   return (
     <>
       {loading && <Preloader onComplete={finishLoading} />}
-      <div inert={loading} aria-hidden={loading || undefined}>
+      <PageTransition disabled={loading}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/acesso" element={<Access />} />
           <Route path="/helloworld" element={<HelloWorld />} />
         </Routes>
-      </div>
+      </PageTransition>
     </>
   )
 }

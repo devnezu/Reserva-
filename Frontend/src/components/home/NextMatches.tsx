@@ -2,29 +2,30 @@ import { Link } from 'react-router'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowUpRight01Icon, Calendar03Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
-import { featuredMatch, matches } from './matches'
-import TeamName from './TeamName'
+import { matches } from './matches'
 
 export default function NextMatches() {
   return (
     <section aria-labelledby="next-matches-title" className="mx-auto w-full max-w-7xl px-6 py-20 sm:px-12 lg:py-24">
-      <p className="mb-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.22em]"><span className="h-1.5 w-1.5 rounded-full bg-black" />Agenda</p>
-      <h2 id="next-matches-title" className="text-4xl leading-[1.02] font-semibold tracking-[-0.05em] sm:text-5xl">Próximos jogos</h2>
+      <div className="flex items-center justify-center gap-4 sm:gap-8">
+        <span aria-hidden="true" className="h-[3px] max-w-48 flex-1 rounded-full bg-gradient-to-r from-transparent to-[#ED1C24]" />
+        <h2 id="next-matches-title" className="text-center text-3xl leading-none font-extrabold tracking-[-0.03em] uppercase sm:text-5xl lg:text-6xl">Próximos <span className="text-[#ED1C24]">jogos</span></h2>
+        <span aria-hidden="true" className="h-[3px] max-w-48 flex-1 rounded-full bg-gradient-to-l from-transparent to-[#ED1C24]" />
+      </div>
 
-      <ul className="mt-12 grid gap-8 md:grid-cols-2">
+      <ul className="mt-12 grid gap-8 lg:grid-cols-2">
         {matches.map((match) => (
           <li key={match.id} className="flex flex-col overflow-hidden rounded-3xl border border-black/10 bg-white">
-            <div className="relative">
-              <img src={match.image} alt={`Escudos de ${match.home} e ${match.away}`} loading="lazy" className="aspect-[740/475] w-full object-cover" />
-              {match.id === featuredMatch.id && <span className="absolute left-5 top-5 rounded-full bg-black px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">Destaque</span>}
-            </div>
-            <div className="flex flex-1 flex-col gap-6 p-6 sm:flex-row sm:items-end sm:justify-between sm:p-8">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">{match.competition}</p>
-                <h3 className="mt-2 flex flex-wrap items-center gap-2 text-2xl leading-tight font-semibold tracking-[-0.03em] uppercase"><TeamName name={match.home} crest={match.homeCrest} /><span className="font-light lowercase italic">x</span><TeamName name={match.away} crest={match.awayCrest} /></h3>
-                <p className="mt-3 flex items-center gap-2 text-sm text-neutral-600"><HugeiconsIcon icon={Calendar03Icon} size={16} />{match.date} - {match.time}</p>
+            <img src={match.image} alt={`Escudos de ${match.home} e ${match.away}`} loading="lazy" className="aspect-[740/475] w-full object-cover" />
+            <div className="flex flex-1 flex-col gap-6 p-6 sm:p-8">
+              <div className="flex items-center gap-4 sm:gap-5">
+                <img src="/brasileirao-2026.svg" alt={match.competition} className="h-14 w-auto shrink-0 brightness-0 sm:h-16" />
+                <div className="min-w-0">
+                  <h3 className="text-sm leading-tight font-semibold tracking-[-0.03em] whitespace-nowrap uppercase min-[420px]:text-base sm:text-2xl lg:text-lg xl:text-[22px]">{match.home} <span className="font-light lowercase italic">x</span> {match.away}</h3>
+                  <p className="mt-2.5 inline-flex items-center gap-2 rounded-full bg-[#ED1C24]/10 px-3.5 py-1.5 text-sm font-bold text-[#ED1C24] sm:text-base"><HugeiconsIcon icon={Calendar03Icon} size={18} />{match.date} - {match.time}</p>
+                </div>
               </div>
-              <Button asChild className="h-12 shrink-0 gap-4 rounded-full bg-[#ED1C24] px-6 text-sm font-bold tracking-wide text-white uppercase shadow-lg shadow-[#ED1C24]/30 transition-transform duration-200 hover:scale-[1.04] hover:bg-[#d0161d] active:scale-100">
+              <Button asChild className="h-12 w-full gap-4 rounded-full bg-[#ED1C24] px-6 text-sm font-bold tracking-wide text-white uppercase shadow-lg shadow-[#ED1C24]/30 transition-transform duration-200 hover:scale-[1.02] hover:bg-[#d0161d] active:scale-100">
                 <Link to="/acesso">Comprar ingresso <HugeiconsIcon icon={ArrowUpRight01Icon} size={18} /></Link>
               </Button>
             </div>
