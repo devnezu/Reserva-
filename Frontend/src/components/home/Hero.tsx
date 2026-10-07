@@ -3,14 +3,13 @@ import { motion, useReducedMotion } from 'motion/react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowUpRight01Icon, Calendar03Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
-import heroImage from '@/assets/home-hero.png'
 import { featuredMatch } from './matches'
 
 export default function Hero() {
   const reducedMotion = useReducedMotion()
   return (
     <section aria-labelledby="hero-title" className="relative flex flex-col xl:min-h-[max(480px,33.8vw)] xl:justify-center">
-      <img src={heroImage} alt="Três jogadores do São Paulo sorrindo com a camisa branca do clube" className="h-64 w-full object-cover object-right sm:h-80 lg:h-[420px] xl:absolute xl:inset-0 xl:h-full" />
+      <img src="/backgroundHome.png" alt="Três jogadores do São Paulo sorrindo com a camisa branca do clube" className="h-64 w-full object-cover object-right sm:h-80 lg:h-[420px] xl:absolute xl:inset-0 xl:h-full" />
       <div aria-hidden="true" className="absolute inset-0 hidden bg-gradient-to-r from-[#4d0408]/80 via-[#4d0408]/25 via-40% to-transparent xl:block" />
 
       <motion.div initial={reducedMotion ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }} className="relative mx-auto w-full max-w-7xl px-6 py-14 text-white sm:px-12 xl:pb-8 xl:pt-28">
