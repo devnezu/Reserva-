@@ -1,7 +1,43 @@
 @import "tailwindcss";
 
 @theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
   --font-sans: "Figtree", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+:root {
+  --background: #faf8f7;
+  --foreground: #111111;
+  --primary: #111111;
+  --primary-foreground: #ffffff;
+  --secondary: #f0eceb;
+  --secondary-foreground: #111111;
+  --muted: #f0eceb;
+  --muted-foreground: #77716f;
+  --accent: #f0eceb;
+  --accent-foreground: #111111;
+  --destructive: #b42318;
+  --border: #e4dfdc;
+  --input: #e4dfdc;
+  --ring: #77716f;
+  --radius: 0.625rem;
 }

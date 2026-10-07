@@ -25,7 +25,9 @@ yarn install
 yarn dev
 ```
 
-Frontend: http://localhost:5173/helloworld. A home `/` fica vazia.
+Frontend: http://localhost:5173. A home apresenta o projeto e direciona a compra de ingressos para `/acesso`. A pagina de acesso alterna cadastro e login com Motion. O Hello World permanece em `/helloworld`.
+
+A interface utiliza componentes shadcn/ui (`Button` e `Input`), Hugeicons e Tailwind v4. Os formularios possuem validacao nativa, mas autenticacao, cadastro de usuarios e compra de ingressos ainda nao estao conectados ao backend. A marca e Reservai, com a logo fornecida em `Frontend/public`.
 
 HTTP: http://127.0.0.1:3001/api/hello
 
