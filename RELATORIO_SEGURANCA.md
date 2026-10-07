@@ -1,6 +1,29 @@
 # Revisão de segurança — Reservaí
 
-Data: 07/10/2026. Revisão do código local, testes existentes e reproduções em SQLite temporário. Nenhuma correção foi aplicada nesta revisão. As alterações de outros colaboradores foram preservadas.
+Data: 07/10/2026. Revisão do código local, testes existentes e reproduções em SQLite temporário. As alterações de outros colaboradores foram preservadas. Os achados abaixo descrevem o estado da auditoria inicial; as correções posteriores estão registradas a seguir.
+
+## Situação após as correções
+
+Todos os achados de alta (A1–A6) e média (M1–M7) receberam correções e testes de regressão. Os pontos de baixa criticidade e limites intencionais continuam descritos como recomendações/decisões de produto, fora do escopo solicitado para esta correção.
+
+| Achados | Correção |
+| --- | --- |
+| A1 | Autorização revalidada após leitura do corpo e dentro da transação IMMEDIATE, inclusive em uploads |
+| A2 | Taxas e cotas persistentes; limite de pendentes; retenção de recusas por sete dias; chaves de reservas criadas preservadas |
+| A3 | Limites compartilhados por usuário/IP/global; replay único por conexão; frequência limitada; consulta da outbox filtra destinatário no SQL |
+| A4 | Horário com piso persistente e avanço monotônico; expiração persistida na edição de capacidade; confirmação valida a invariante |
+| A5 | Seed proibida em produção; sessões e login das contas demo negados nesse ambiente |
+| A6 | Migrações não promovem por e-mail; registro de concessão de admin; provisionamento explícito por CLI |
+| M1 | Notificações atuais e históricas de rascunhos filtradas |
+| M2 | Um 401 leva à consulta da identidade atual; resposta antiga não encerra novo login |
+| M3 | Falhas contadas por IP/e-mail, sucesso limpa falhas, senha correta não depende desse bloqueio; proxies confiáveis configuráveis |
+| M4 | Orçamento único para avatar/banner e entre instâncias; taxa atômica; prazos de leitura e processamento de imagem |
+| M5/M6 | Limpeza captura falhas da operação inteira; tentativas e backoff permitem avançar outros jobs |
+| M7 | Arquivamento e vínculo conferidos na mesma transação; compensação não apaga arquivo já commitado |
+
+Validação após as correções: **70 testes do Backend e 5 testes do Frontend passaram**, além de build e lint. Verificações de navegador mantiveram a sessão nova, impediram acesso à reserva alheia e passaram o fluxo de reserva/confirmação/QR Code e seus fallbacks. As migrations 007/008 foram aplicadas ao banco local, preservando as contagens: 3 usuários, 4 eventos, 6 reservas e 5 arquivos.
+
+Detalhes de limites, configuração, arquivos alterados e contrato de retenção: [docs/SEGURANCA.md](docs/SEGURANCA.md).
 
 ## Resultado e alcance
 
