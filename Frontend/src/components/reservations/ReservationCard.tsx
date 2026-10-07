@@ -87,7 +87,7 @@ export function ReservationCard({ reservation: incoming, serverTime: incomingTim
       </div>
 
       {hasStub && (
-        <div className="relative flex flex-col justify-center border-t-2 border-dashed border-black/15 p-5 sm:p-7 lg:w-80 lg:shrink-0 lg:border-t-0 lg:border-l-2">
+        <div className="relative flex flex-col justify-center border-t-2 border-dashed border-black/15 p-5 sm:p-7 lg:w-[22rem] lg:shrink-0 lg:border-t-0 lg:border-l-2">
           <span aria-hidden="true" className="absolute -top-3.5 -left-3 size-6 rounded-full border border-black/10 bg-[#faf8f7] lg:-top-3 lg:-left-3.5" />
           <span aria-hidden="true" className="absolute -top-3.5 -right-3 size-6 rounded-full border border-black/10 bg-[#faf8f7] lg:top-auto lg:right-auto lg:-bottom-3 lg:-left-3.5" />
           {pending
