@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { ArrowDown01Icon, ArrowRight01Icon, Cancel01Icon, Logout01Icon, Menu01Icon, UserCircleIcon } from '@hugeicons/core-free-icons'
+import { ArrowDown01Icon, Calendar03Icon, ArrowRight01Icon, Cancel01Icon, Logout01Icon, Menu01Icon, UserCircleIcon } from '@hugeicons/core-free-icons'
 import { useAuth } from '@/hooks/use-auth'
 import { useGoToAgenda } from '@/hooks/use-go-to-agenda'
 import { notify } from '@/lib/notify'
@@ -74,19 +74,19 @@ export default function UserMenu() {
 
   return (
     <>
-      <div ref={rootRef} className={cn('relative hidden', pathname !== '/conta' && 'md:block')}>
-        <button type="button" aria-haspopup="menu" aria-expanded={open} aria-controls={menuId} onClick={() => setOpen((value) => !value)} className={cn('flex h-11 max-w-[16rem] items-center gap-2 px-5 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white', open ? 'rounded-t-[22px] bg-white text-[#111111]' : 'rounded-[22px] bg-white/15 text-white ring-1 ring-white/35 backdrop-blur-sm hover:bg-white/25')}>
-          <UserAvatar user={user} className="size-7 text-xs ring-1 ring-white/35" />
-          <span className="truncate">Olá, {user?.name}</span>
+      <div ref={rootRef} className={cn('relative hidden w-60 max-w-full', pathname !== '/conta' && 'md:block')}>
+        <button type="button" aria-haspopup="menu" aria-expanded={open} aria-controls={menuId} onClick={() => setOpen((value) => !value)} className={cn('flex h-12 w-full items-center gap-3 pr-5 pl-2.5 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white', open ? 'rounded-t-[24px] bg-white text-[#111111]' : 'rounded-[24px] bg-white/15 text-white ring-1 ring-white/35 backdrop-blur-sm hover:bg-white/25')}>
+          <UserAvatar user={user} className={cn('size-8 text-xs ring-1', open ? 'bg-[#ED1C24] text-white ring-[#ED1C24]/20' : 'ring-white/35')} />
+          <span className="min-w-0 flex-1 truncate text-left">Olá, {user?.name}</span>
           <HugeiconsIcon icon={ArrowDown01Icon} size={16} className={cn('shrink-0 transition-transform duration-200', open && 'rotate-180')} />
         </button>
         <AnimatePresence>
           {open && (
-            <motion.div id={menuId} role="menu" initial={{ height: 0, opacity: reducedMotion ? 1 : 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: reducedMotion ? 1 : 0 }} transition={{ duration: reducedMotion ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }} className="absolute top-full right-0 z-30 w-52 min-w-full overflow-hidden rounded-b-[22px] rounded-tl-[22px] bg-white text-[#111111] shadow-[0_20px_45px_-18px_rgba(0,0,0,0.45)]">
+            <motion.div id={menuId} role="menu" initial={{ height: 0, opacity: reducedMotion ? 1 : 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: reducedMotion ? 1 : 0 }} transition={{ duration: reducedMotion ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-x-0 top-full z-30 overflow-hidden rounded-b-[24px] bg-white text-[#111111] shadow-[0_20px_45px_-18px_rgba(0,0,0,0.45)]">
               <div className="border-t border-black/10 py-2">
-                <Link role="menuitem" to="/conta" onClick={() => setOpen(false)} className={ITEM_CLASS}><HugeiconsIcon icon={UserCircleIcon} size={18} />Ir para conta</Link>
-                {user?.role === 'admin' && <Link role="menuitem" to="/admin/eventos" onClick={() => setOpen(false)} className={ITEM_CLASS}>Gerenciar eventos</Link>}
-                <button role="menuitem" type="button" onClick={() => { void leave() }} disabled={busy} className={cn(ITEM_CLASS, 'text-[#ED1C24]')}><HugeiconsIcon icon={Logout01Icon} size={18} />{busy ? 'Saindo…' : 'Sair'}</button>
+                <Link role="menuitem" to="/conta" onClick={() => setOpen(false)} className={ITEM_CLASS}><HugeiconsIcon icon={UserCircleIcon} size={18} className="shrink-0" /><span className="truncate">Ir para conta</span></Link>
+                {user?.role === 'admin' && <Link role="menuitem" to="/admin/eventos" onClick={() => setOpen(false)} className={ITEM_CLASS}><HugeiconsIcon icon={Calendar03Icon} size={18} className="shrink-0" /><span className="truncate">Gerenciar eventos</span></Link>}
+                <button role="menuitem" type="button" onClick={() => { void leave() }} disabled={busy} className={cn(ITEM_CLASS, 'text-[#ED1C24]')}><HugeiconsIcon icon={Logout01Icon} size={18} className="shrink-0" /><span className="truncate">{busy ? 'Saindo…' : 'Sair'}</span></button>
               </div>
             </motion.div>
           )}

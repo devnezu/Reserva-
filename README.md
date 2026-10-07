@@ -25,11 +25,15 @@ yarn install
 yarn dev
 ```
 
-Frontend: http://localhost:5173. Na home, os links de ingressos levam visitantes para `/acesso`; usuarios autenticados permanecem na Home e rolam ate a secao de proximos jogos. A pagina de acesso alterna cadastro e login com Motion. Login e cadastro redirecionam para a Home. O Hello World permanece em `/helloworld`.
+Frontend: http://localhost:5173. A pagina de acesso alterna cadastro e login com Motion. Login e cadastro redirecionam para a Home. O Hello World permanece em `/helloworld`. Os cards e o destaque da home abrem a pagina dinamica do evento. Visitantes podem consultar as informacoes; o botao de compra leva ao login quando necessario.
 
 A interface utiliza componentes shadcn/ui (`Button` e `Input`), Hugeicons e Tailwind v4. Login e cadastro estao conectados ao backend, com restauracao de sessao ao recarregar, sincronizacao entre abas, logout e protecao de `/conta`. A animacao de alternancia foi preservada. Compra de ingressos ainda nao esta conectada ao backend. Recuperacao de senha nao faz parte dos planos do projeto. A marca e Reservaí. A logo fornecida em `Frontend/public` foi vetorizada em `src/components/brand-mark.ts`, com acento agudo no i final.
 
-O backend executa migrations e o seed dos usuarios Rafael (`dry1@reservai.com`) e Gustavo (`dry2@reservai.com`) ao iniciar em desenvolvimento. Tambem e possivel executar `yarn seed` na pasta Backend. Veja `Backend/README.md` para arquitetura, endpoints e configuracao de producao.
+O backend executa migrations e o seed dos usuarios Rafael (`dry1@reservai.com`, papel `user`) e Gustavo (`dry2@reservai.com`, papel `admin`) ao iniciar em desenvolvimento. Tambem cria tres eventos futuros, um deles com capacidade de apenas 2 ingressos. O seed nao sobrescreve contas ou eventos existentes. Tambem e possivel executar `yarn seed` na pasta Backend. Veja `Backend/README.md` para arquitetura, endpoints e configuracao de producao.
+
+Os proximos jogos da home usam o catalogo SQLite, com busca por titulo, filtro de categoria e paginacao no servidor. Precos ficam em centavos inteiros (R$ 34,50 = 3450); cada card exibe banner, titulo, local, data, preco, disponibilidade e prazo de reserva. O SVG do Brasileirao aparece somente em Futebol. Gustavo pode acessar `/admin/eventos` pelo menu ou pela conta e cadastrar/editar/arquivar eventos, com banner no Cloudinary de ate 25 MB. O campo Conteudo aceita Markdown, possui previa no formulario e aparece somente na pagina do evento.
+
+Paginas como `/eventos/spfc-vitoria` consultam os valores atuais no banco, mantendo as imagens originais. A migration 005 e o seed levam os textos antes fixos (descricao e Antes de ir) para o SQLite, preservando edicoes existentes. Os slugs sao unicos e estaveis ao editar titulos. O total de ingressos e calculado em centavos e a selecao respeita a disponibilidade; eventos encerrados e esgotados exibem a compra desabilitada. Compra/reserva efetiva ainda sera implementada.
 
 Na tela `/conta`, o usuario pode adicionar ou trocar sua foto de perfil (JPG, PNG ou WebP de ate 25 MB). O backend prepara a imagem e envia ao Cloudinary, mantendo o vinculo e os metadados no SQLite. O avatar e restaurado ao entrar e sincronizado entre abas. As credenciais do Cloudinary ficam apenas no `.env` do Backend; veja `Backend/.env.example`.
 

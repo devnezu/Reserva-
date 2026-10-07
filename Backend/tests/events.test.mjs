@@ -57,6 +57,10 @@ test('Dynamic events, money, RBAC and banners', async (suite) => {
     const page = await list()
     assert.equal(page.total, 3)
     assert.equal(page.items[0].unitPriceCents, 3450)
+    assert.equal(page.items[0].slug, 'spfc-vitoria')
+    const publicEvent = await request('/api/events/public/spfc-vitoria')
+    assert.equal(publicEvent.status, 200)
+    assert.match((await publicEvent.json()).event.content, /O Tricolor recebe o Vitória/)
     assert.equal(page.items.find((item) => item.genre === 'pop').available, 2)
     assert.ok(page.items.every((item) => item.startsAt > Date.now() && !('content' in item)))
     db.prepare('UPDATE events SET title = ? WHERE id = ?').run('Título preservado', page.items[0].id)
@@ -83,17 +87,19 @@ test('Dynamic events, money, RBAC and banners', async (suite) => {
     assert.equal((await request('/api/events/1')).status, 401)
   })
   await suite.test('rejects fractional cents, invalid capacities, categories, content and inconsistent dates', async () => {
-    for (const change of [{ unitPriceCents: 34.5 }, { unitPriceCents: '3450' }, { unitPriceCents: -1 }, { capacity: 1.5 }, { capacity: 0 }, { genre: 'invalid' }, { content: {} }, { content: 'a'.repeat(20001) }, { endsAt: base.startsAt }, { expiresAt: base.startsAt + 1 }, { startsAt: '2026-10-10' }, { expiresAt: Date.now() - 1 }]) {
+    for (const change of [{ unitPriceCents: 34.5 }, { unitPriceCents: '3450' }, { unitPriceCents: -1 }, { capacity: 1.5 }, { capacity: 0 }, { genre: 'invalid' }, { content: {} }, { content: 'a'.repeat(20001) }, { endsAt: base.startsAt }, { expiresAt: base.startsAt + 1 }, { startsAt: '2026-10-10' }, { expiresAt: Date.now() - 60000 }]) {
       assert.equal((await request('/api/events', 'POST', { ...base, ...change }, admin.cookie)).status, 400, JSON.stringify(change).slice(0, 100))
     }
     assert.equal(db.prepare('SELECT COUNT(*) AS total FROM events').get().total, 3)
   })
   await suite.test('draft preserves multiline plain content, hidden from users and catalog; upload publishes a sanitized banner', async () => {
     event = await create()
+    assert.match(event.slug, /^evento-pop-de-teste-\d+$/)
     assert.equal(event.status, 'draft')
     assert.equal(event.content, base.content)
     assert.equal((await list()).total, 3)
     assert.equal((await request(`/api/events/${event.id}`, 'GET', undefined, user.cookie)).status, 404)
+    assert.equal((await request(`/api/events/public/${event.slug}`)).status, 404)
     assert.equal((await banner(event.id, admin.cookie, 'broken')).status, 400)
     assert.equal((await banner(event.id, admin.cookie, png, { 'Content-Type': 'image/jpeg' })).status, 415)
     const response = await banner(event.id)
@@ -102,6 +108,13 @@ test('Dynamic events, money, RBAC and banners', async (suite) => {
     assert.equal(event.status, 'open')
     assert.match(event.bannerUrl, /^https:\/\//)
     assert.equal((await get(event.id, user.cookie)).content, base.content)
+    for (const reference of [event.slug, event.id]) {
+      const published = await request(`/api/events/public/${reference}`)
+      assert.equal(published.status, 200)
+      assert.equal((await published.json()).event.content, base.content)
+    }
+    assert.equal((await request('/api/events/public/does-not-exist')).status, 404)
+    assert.equal((await request('/api/events/public/Invalid%20Address')).status, 400)
     const upload = operations().find((op) => op.action === 'upload')
     assert.equal(upload.format, 'webp')
     assert.equal(upload.width, 1920)
@@ -127,6 +140,9 @@ test('Dynamic events, money, RBAC and banners', async (suite) => {
       assert.equal((await get(event.id)).unitPriceCents, cents)
       assert.equal(db.prepare('SELECT typeof(unit_price_cents) AS type FROM events WHERE id = ?').get(event.id).type, 'integer')
     }
+    const renamed = await request(`/api/events/${event.id}`, 'PATCH', { ...base, title: 'Título alterado sem quebrar URL' }, admin.cookie)
+    assert.equal(renamed.status, 200)
+    assert.equal((await renamed.json()).event.slug, event.slug)
   })
   await suite.test('failed replacement keeps previous banner; successful replacement deletes only the old Cloudinary asset', async () => {
     const oldUrl = (await get(event.id)).bannerUrl
@@ -147,13 +163,15 @@ test('Dynamic events, money, RBAC and banners', async (suite) => {
     assert.equal(soldOut.available, 0)
     assert.equal(soldOut.status, 'sold_out')
     assert.equal((await request(`/api/events/${event.id}`, 'PATCH', { ...base, capacity: 1 }, admin.cookie)).status, 409)
-    db.prepare('UPDATE events SET expires_at = ? WHERE id = ?').run(Date.now() - 1, event.id)
+    db.prepare('UPDATE events SET expires_at = ? WHERE id = ?').run(Date.now() - 60000, event.id)
     assert.equal((await get(event.id)).status, 'expired')
+    assert.equal((await request(`/api/events/public/${event.slug}`)).status, 200)
     assert.ok(!(await list()).items.some((row) => row.id === event.id))
     assert.ok((await list('', true)).items.some((row) => row.id === event.id))
     assert.equal((await request('/api/events/1', 'DELETE', undefined, admin.cookie)).status, 204)
     await stop(server); server = await start()
     assert.equal((await request('/api/events/1', 'GET', undefined, admin.cookie)).status, 404)
+    assert.equal((await request('/api/events/public/spfc-vitoria')).status, 404)
     assert.ok(!(await list('', true)).items.some((row) => row.id === 1))
     assert.equal(db.prepare('SELECT COUNT(*) AS total FROM events WHERE seed_key IS NOT NULL').get().total, 3)
   })

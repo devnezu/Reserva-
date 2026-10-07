@@ -5,7 +5,7 @@ import { seed } from './seed.js'
 try {
   migrate()
   await seed()
-  console.log('Seed concluido: Rafael e Gustavo disponiveis.')
+  console.log('Seed concluido: usuarios e tres eventos disponiveis, com URLs e conteudo da pagina.')
 } finally {
   database.close()
 }

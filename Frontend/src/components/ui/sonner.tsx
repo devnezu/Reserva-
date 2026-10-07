@@ -6,7 +6,7 @@ import {
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
 // Tempo que o toast fica na tela; a barra de progresso usa o mesmo valor.
-const TOAST_DURATION_MS = 6000
+const TOAST_DURATION_MS = 5000
 
 const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
   return (

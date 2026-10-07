@@ -20,6 +20,15 @@ function find(id: number) {
   return row
 }
 export async function eventsRoutes(request: IncomingMessage, response: ServerResponse, pathname: string) {
+  const publicMatch = /^\/api\/events\/public\/([^/]+)$/.exec(pathname)
+  if (publicMatch && request.method === 'GET') {
+    const reference = publicMatch[1]
+    if (reference.length > 180 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(reference)) throw new HttpError(400, 'Endereço do evento inválido.')
+    const row = eventsRepository.findPublished(reference)
+    if (!row) throw new HttpError(404, 'Evento não encontrado.')
+    json(response, 200, { event: eventDto(row, true) })
+    return true
+  }
   if (pathname === '/api/events' && request.method === 'GET') {
     json(response, 200, eventsRepository.list(parseQuery(new URL(request.url!, 'http://localhost')), false))
     return true

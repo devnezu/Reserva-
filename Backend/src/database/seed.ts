@@ -1,5 +1,6 @@
 import { database } from './connection.js'
 import { hashPassword } from '../modules/auth/password.js'
+import { legacyEventContent } from './event-content.js'
 
 const users = [
   { name: 'Rafael', email: 'dry1@reservai.com', password: 'dryedemais123', role: 'user' },
@@ -23,7 +24,9 @@ export async function seed() {
   database.transaction(() => {
     for (const event of events) {
       const startsAt = Math.floor((now + event.days * day) / 60000) * 60000
-      database.prepare('INSERT INTO events (seed_key, title, genre, location, unit_price_cents, capacity, starts_at, ends_at, expires_at, banner_url, published, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?) ON CONFLICT(seed_key) DO NOTHING').run(event.key, event.title, event.genre, event.location, event.price, event.capacity, startsAt, startsAt + 2 * 60 * 60 * 1000, startsAt - 60 * 60 * 1000, event.banner, creator.id, now, now)
+      const original = legacyEventContent.find((item) => item.key === event.key)
+      const slug = original?.slug ?? 'noite-pop'
+      database.prepare('INSERT INTO events (seed_key, slug, title, genre, location, content, unit_price_cents, capacity, starts_at, ends_at, expires_at, banner_url, published, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?) ON CONFLICT(seed_key) DO NOTHING').run(event.key, slug, event.title, event.genre, event.location, original?.content ?? '', event.price, event.capacity, startsAt, startsAt + 2 * 60 * 60 * 1000, startsAt - 60 * 60 * 1000, event.banner, creator.id, now, now)
     }
   })()
 }

@@ -1,7 +1,8 @@
 import { database } from '../../database/connection.js'
+import type { Role } from './permissions.js'
 
-export interface UserRow { id: number; name: string; email: string; password_hash: string; avatar_url: string | null; role: 'user' | 'admin' }
-export interface SessionRow { id: number; name: string; email: string; token_hash: string; expires_at: number; avatar_url: string | null; role: 'user' | 'admin' }
+export interface UserRow { id: number; name: string; email: string; password_hash: string; avatar_url: string | null; role: Role }
+export interface SessionRow { id: number; name: string; email: string; token_hash: string; expires_at: number; avatar_url: string | null; role: Role }
 
 export const authRepository = {
   findUser(email: string) { return database.prepare('SELECT users.id, name, email, password_hash, role, files.secure_url AS avatar_url FROM users LEFT JOIN files ON files.id = users.avatar_file_id WHERE email = ?').get(email) as UserRow | undefined },

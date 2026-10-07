@@ -4,6 +4,7 @@ const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: '
 const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' })
 export const formatPrice = (cents: number) => currency.format(cents / 100)
 export const formatEventDate = (timestamp: number) => date.format(timestamp)
+export const eventPath = (event: EventRecord) => `/eventos/${event.slug}`
 export const EVENT_STATUS = { draft: 'Rascunho', open: 'Disponível', sold_out: 'Esgotado', expired: 'Encerrado' } as const
 export const isEventOpen = (event: EventRecord) => event.status === 'open' && event.expiresAt > Date.now() && event.startsAt > Date.now()
 export function parsePrice(value: string) {

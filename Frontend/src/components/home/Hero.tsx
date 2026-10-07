@@ -3,17 +3,15 @@ import { motion, useReducedMotion } from 'motion/react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowUpRight01Icon, Calendar03Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
-import { featuredMatch, matchPath } from './matches'
 import { useEvents } from '@/hooks/use-events'
-import { formatEventDate } from '@/lib/events'
+import { eventPath, formatEventDate } from '@/lib/events'
 import { TicketAccessLink } from './TicketAccessLink'
 
 export default function Hero() {
   const reducedMotion = useReducedMotion()
   const { data } = useEvents({ pageSize: 1 })
   const featured = data?.items[0]
-  const legacyFeatured = featured?.title === `${featuredMatch.home} x ${featuredMatch.away}`
-  const HeroLink = legacyFeatured ? Link : TicketAccessLink
+  const HeroLink = featured ? Link : TicketAccessLink
   return (
     <section aria-labelledby="hero-title" className="relative flex flex-col items-center xl:min-h-[max(480px,33.8vw)] xl:items-stretch xl:justify-center">
       <img src="/backgroundHome.png" alt="Três jogadores do São Paulo sorrindo com a camisa branca do clube" className="absolute inset-0 hidden size-full object-cover object-right xl:block" />
@@ -28,7 +26,7 @@ export default function Hero() {
           {featured && <p className="inline-flex items-center gap-2.5 rounded-full bg-white/15 px-4 py-2 text-base font-bold ring-1 ring-white/35 backdrop-blur-sm sm:text-lg"><HugeiconsIcon icon={Calendar03Icon} size={20} />{formatEventDate(featured.startsAt)}</p>}
         </div>
         <Button asChild className="group relative mt-8 h-16 gap-5 rounded-full bg-white pr-2.5 pl-8 text-base font-bold tracking-wide text-black uppercase shadow-[0_14px_40px_-10px_rgba(0,0,0,0.7)] transition-transform duration-200 hover:scale-[1.04] hover:bg-white active:scale-100">
-          <HeroLink to={matchPath(featuredMatch)}>
+          <HeroLink to={featured ? eventPath(featured) : '/#proximos-jogos'}>
             {!reducedMotion && <motion.span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-full" animate={{ boxShadow: ['0 0 0 0 rgba(255,255,255,0.6)', '0 0 0 18px rgba(255,255,255,0)'] }} transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut' }} />}
             Comprar ingresso
             <span className="flex size-11 items-center justify-center rounded-full bg-[#ED1C24] text-white transition-transform duration-200 group-hover:rotate-45"><HugeiconsIcon icon={ArrowUpRight01Icon} className="size-5!" /></span>

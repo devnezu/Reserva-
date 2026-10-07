@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { localDateInput, parsePrice, priceInput } from '@/lib/events'
 import { notify } from '@/lib/notify'
+import { MarkdownContent } from './MarkdownContent'
 
 const fieldClass = 'mt-2 h-12 rounded-xl border-black/15 bg-white'
 function initialFields(event?: EventRecord) {
@@ -62,7 +63,7 @@ export function EventForm({ event, onSaved, onCancel }: { event?: EventRecord; o
     <h2 className="text-2xl font-extrabold uppercase">{event ? 'Editar evento' : 'Novo evento'}</h2>
     <fieldset disabled={busy} className="mt-6 grid min-w-0 gap-5 disabled:opacity-70 sm:grid-cols-2">
       <label className="min-w-0 text-sm font-semibold sm:col-span-2">Título<Input value={fields.title} onChange={(e) => set('title', e.target.value)} required minLength={2} maxLength={160} className={fieldClass} /></label>
-      <label className="text-sm font-semibold">Categoria<select value={fields.genre} onChange={(e) => set('genre', e.target.value as EventGenre)} className={`${fieldClass} block w-full border px-3`}>{Object.entries(EVENT_GENRES).map(([value, title]) => <option key={value} value={value}>{title}</option>)}</select></label>
+      <label className="text-sm font-semibold">Categoria<select aria-label="Categoria" value={fields.genre} onChange={(e) => set('genre', e.target.value as EventGenre)} className={`${fieldClass} block w-full border px-3`}>{Object.entries(EVENT_GENRES).map(([value, title]) => <option key={value} value={value}>{title}</option>)}</select></label>
       <label className="text-sm font-semibold">Local<Input value={fields.location} onChange={(e) => set('location', e.target.value)} required minLength={2} maxLength={200} className={fieldClass} /></label>
       <label className="text-sm font-semibold">Preço unitário (R$)<Input inputMode="decimal" value={fields.price} onChange={(e) => set('price', e.target.value)} required placeholder="34,50" className={fieldClass} /></label>
       <label className="text-sm font-semibold">Total de ingressos<Input type="number" min={event?.reservedCount || 1} max={1000000} step={1} value={fields.capacity} onChange={(e) => set('capacity', e.target.value)} required className={fieldClass} /></label>
@@ -70,7 +71,8 @@ export function EventForm({ event, onSaved, onCancel }: { event?: EventRecord; o
       <label className="min-w-0 text-sm font-semibold">Término<Input type="datetime-local" value={fields.endsAt} onChange={(e) => set('endsAt', e.target.value)} required className={fieldClass} /></label>
       <label className="min-w-0 text-sm font-semibold">Reservas até<Input type="datetime-local" value={fields.expiresAt} onChange={(e) => set('expiresAt', e.target.value)} required className={fieldClass} /></label>
       <p className="self-center text-xs text-neutral-500">Preencha as datas no seu horário local. O prazo de reserva deve ser anterior ou igual ao início.</p>
-      <label className="text-sm font-semibold sm:col-span-2">Conteúdo<textarea value={fields.content} onChange={(e) => set('content', e.target.value)} maxLength={20000} rows={8} placeholder="Descreva o evento, benefícios e informações…" className="mt-2 block w-full resize-y rounded-xl border border-black/15 bg-white p-4 font-normal focus-visible:outline-[#ED1C24]" /><span className="mt-2 block text-xs font-normal text-neutral-500">Descrição da página do evento. Não aparece nos cards da home.</span></label>
+      <label className="text-sm font-semibold sm:col-span-2">Conteúdo<textarea aria-label="Conteúdo" value={fields.content} onChange={(e) => set('content', e.target.value)} maxLength={20000} rows={8} placeholder="## Sobre o evento&#10;&#10;**Desconto e prioridade**&#10;- 50% de desconto na arquibancada" className="mt-2 block w-full resize-y rounded-xl border border-black/15 bg-white p-4 font-normal focus-visible:outline-[#ED1C24]" /><span className="mt-2 block text-xs font-normal text-neutral-500">Aceita Markdown: títulos, negrito, listas, links e tabelas. Não aparece nos cards da home.</span></label>
+      {fields.content.trim() && <section aria-label="Prévia do conteúdo" className="min-w-0 rounded-xl border border-black/10 bg-[#faf8f7] p-5 sm:col-span-2"><h3 className="mb-4 text-xs font-bold tracking-widest text-[#ED1C24] uppercase">Prévia do conteúdo</h3><MarkdownContent content={fields.content} /></section>}
       <label className="text-sm font-semibold sm:col-span-2">Banner<Input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => { selectFile(e.target.files?.[0]); e.target.value = '' }} className={`${fieldClass} h-auto py-3`} /><span className="mt-2 block text-xs font-normal text-neutral-500">JPG, PNG ou WebP. Até 25 MB e 100 megapixels.</span></label>
       {(preview || event?.bannerUrl) && <img src={preview ?? event?.bannerUrl ?? undefined} alt="Prévia do banner" className="max-h-72 w-full rounded-xl object-contain sm:col-span-2" />}
     </fieldset>

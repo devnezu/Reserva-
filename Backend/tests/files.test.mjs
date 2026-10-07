@@ -65,7 +65,7 @@ test('Authenticated profile photos and file lifecycle', async (suite) => {
 
   await suite.test('migration preserves accounts and upload requires authentication and trusted requests', async () => {
     assert.equal(db.prepare('SELECT password_hash FROM users WHERE id = 1').get().password_hash, passwordHash)
-    assert.deepEqual(db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((row) => row.version), [1, 2, 3, 4])
+    assert.deepEqual(db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((row) => row.version), [1, 2, 3, 4, 5])
     assert.equal((await me(cookie)).user.avatarUrl, null)
     assert.equal((await upload(png)).status, 401)
     assert.equal((await upload(png, cookie, { Origin: 'https://untrusted.example' })).status, 403)

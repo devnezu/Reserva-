@@ -3,7 +3,7 @@ import { apiRequest } from './auth'
 export const EVENT_GENRES = { football: 'Futebol', sport: 'Esportes', pop: 'Pop', music: 'Música', other: 'Outros' } as const
 export type EventGenre = keyof typeof EVENT_GENRES
 export interface EventRecord {
-  id: number; title: string; genre: EventGenre; location: string; unitPriceCents: number;
+  id: number; slug: string; title: string; genre: EventGenre; location: string; unitPriceCents: number;
   capacity: number; reservedCount: number; available: number; startsAt: number; endsAt: number; expiresAt: number;
   bannerUrl: string | null; status: 'draft' | 'open' | 'sold_out' | 'expired'; content?: string;
 }
@@ -18,6 +18,7 @@ export const eventsApi = {
     return apiRequest<EventsPage>(`/api/events${query.manage ? '/manage' : ''}?${params}`, { signal })
   },
   get: (id: number, signal?: AbortSignal) => apiRequest<{ event: EventRecord }>(`/api/events/${id}`, { signal }),
+  getPublic: (reference: string, signal?: AbortSignal) => apiRequest<{ event: EventRecord }>(`/api/events/public/${encodeURIComponent(reference)}`, { signal }),
   create: (data: EventInput) => apiRequest<{ event: EventRecord }>('/api/events', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: number, data: EventInput) => apiRequest<{ event: EventRecord }>(`/api/events/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   remove: (id: number) => apiRequest<void>(`/api/events/${id}`, { method: 'DELETE' }),

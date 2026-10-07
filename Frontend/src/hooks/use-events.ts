@@ -20,5 +20,6 @@ export function useEvents({ page = 1, pageSize = 6, q = '', genre = '', manage =
     const interval = window.setInterval(refresh, 60000)
     return () => { window.removeEventListener(EVENTS_CHANGED, refresh); window.removeEventListener('focus', refresh); window.clearInterval(interval) }
   }, [refresh])
-  return { data: result.key === key ? result.data : undefined, error: result.key === key ? result.error : undefined, loading: result.key !== key, refresh }
+  // Mantém a última lista na tela enquanto a nova carrega, para a troca de filtro não piscar.
+  return { data: result.data, error: result.key === key ? result.error : undefined, loading: result.key !== key, refresh }
 }
