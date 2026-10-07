@@ -20,8 +20,8 @@ export default function Access() {
   }
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (login) notify.info('O login estará disponível em breve.', 'Estamos preparando seu acesso.')
-    else notify.info('O cadastro estará disponível em breve.', 'Estamos preparando sua conta.')
+    if (login) notify.info('O login estará disponível em breve.')
+    else notify.info('O cadastro estará disponível em breve.')
   }
 
   const panelContent = (
