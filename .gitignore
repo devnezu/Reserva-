@@ -1,0 +1,63 @@
+# Dependencias e cache dos gerenciadores
+node_modules/
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/install-state.gz
+.pnp.*
+
+# Builds, cobertura e caches
+dist/
+build/
+coverage/
+.vite/
+.cache/
+*.tsbuildinfo
+
+# Variaveis de ambiente e segredos locais
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.aws/
+
+# Banco de dados local e arquivos auxiliares SQLite
+Backend/data/*
+!Backend/data/.gitkeep
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite3-journal
+*.db-wal
+*.db-shm
+*.db-journal
+
+# Logs e arquivos temporarios
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Configuracoes locais de editores e agentes
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.codex/
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# yarn.lock deve ser versionado em Backend e Frontend.
+Backend/yarn.lock
+Frontend/yarn.lock
