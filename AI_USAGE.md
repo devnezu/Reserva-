@@ -45,11 +45,12 @@ As duas ferramentas trabalharam ao mesmo tempo, no mesmo repositório e na mesma
 - Mudanças de interface são conferidas no navegador, em tamanho de desktop e de celular.
 - Antes de aceitar uma mudança em arquivo compartilhado, confiro o diff para garantir que só entrou o que foi pedido.
 - Quando não gosto do resultado, peço para desfazer. Um exemplo fora dos três acima: uma animação de troca de painel no desktop foi implementada, não me agradou e foi revertida.
+- Perto do fim pedi ao Codex uma revisão de segurança do código, ordenada por criticidade, e ao Claude Code que conferisse os achados no código antes de qualquer mudança. Os seis itens de alta e os sete de média criticidade foram corrigidos, cada um com teste; os de baixa ficaram documentados.
 
 ## Tempo efetivo de trabalho
 
-Aproximadamente **6 horas e 45 minutos**, em um único dia:
+Aproximadamente **8 horas**, em um único dia:
 
 - início às 08:52, com cerca de 30 minutos iniciais de preparação do ambiente e das ferramentas;
 - uma pausa de 10 minutos para o almoço;
-- trabalho contínuo até por volta das 15:50, quando este registro foi escrito.
+- trabalho contínuo até por volta das 17:00.

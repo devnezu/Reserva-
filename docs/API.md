@@ -60,7 +60,7 @@ Credenciais erradas respondem `401`:
 { "message": "E-mail ou senha incorretos.", "code": "INVALID_CREDENTIALS" }
 ```
 
-Há limite de tentativas por IP (30) e por e-mail (10) a cada 15 minutos; ao estourar, `429 RATE_LIMITED`.
+Há limites de tentativas: 120 logins por minuto por IP e 10 credenciais erradas por par de IP e e-mail a cada 15 minutos. Ao estourar, `429 RATE_LIMITED`, com o cabeçalho `Retry-After`.
 
 ### Identidade
 
@@ -241,6 +241,8 @@ Recusas:
 | 409 | `INSUFFICIENT_CAPACITY` | Não há ingressos suficientes |
 | 409 | `EVENT_CLOSED` | O evento já começou ou o prazo de reserva encerrou |
 | 409 | `IDEMPOTENCY_CONFLICT` | A mesma chave foi usada com outro evento ou quantidade |
+| 409 | `PENDING_LIMIT` | O usuário já tem 10 reservas pendentes, ou 4 no mesmo evento |
+| 429 | `RATE_LIMITED` | Mais de 60 operações de reserva por minuto do mesmo usuário |
 
 ```json
 { "message": "Escolha uma quantidade inteira entre 1 e 4 ingressos.", "code": "INVALID_QUANTITY" }

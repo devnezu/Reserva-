@@ -44,6 +44,19 @@ A regra é: disponíveis = capacidade − ingressos confirmados − ingressos de
 
 Consultar, confirmar ou cancelar uma reserva alheia responde **404**, idêntico ao de uma reserva inexistente. Escolhi 404 em vez de 403 para não confirmar a quem pergunta que aquele identificador existe. Isso vale inclusive para o administrador.
 
+## Segurança
+
+Perto do fim, pedi a uma das IAs uma revisão de segurança do código, ordenada por criticidade. Ela apontou seis itens de alta e sete de média criticidade, e todos foram corrigidos. Os principais:
+
+- **Autorização revalidada.** As rotas do painel conferem a sessão e o papel de novo depois de ler o corpo da requisição e dentro da transação.
+- **Limites de uso.** Reservas, conexões de tempo real e envios de imagem têm limites por usuário e por IP, guardados no banco.
+- **Limite de reservas pendentes.** Um usuário pode ter até 10 reservas pendentes válidas, e até 4 por evento, para que ninguém segure o estoque inteiro.
+- **Relógio que volta no tempo.** O horário usado nas regras nunca recua abaixo do maior horário já gravado, e a confirmação confere de novo a ocupação.
+- **Contas de demonstração.** Em produção, o seed e o login das contas de demonstração são recusados.
+- **Rascunhos.** Notificações de eventos não publicados não chegam a usuários comuns.
+
+O detalhe de cada correção e a tabela de limites estão em [docs/SEGURANCA.md](docs/SEGURANCA.md); os achados originais, em [RELATORIO_SEGURANCA.md](RELATORIO_SEGURANCA.md).
+
 ## Decisões que divergem do enunciado
 
 - **Catálogo público.** O enunciado fala em usuários autenticados listando e consultando eventos. Aqui a listagem e a página do evento podem ser vistas sem login, como em uma bilheteria real; o login é exigido para reservar e em todas as rotas de reserva e de conta. É uma escolha de produto mantida de propósito.
@@ -76,9 +89,10 @@ Não são exigidos e não substituem nada do fluxo principal. Entraram pelo mesm
 - **Demonstrar a expiração ao vivo exige esperar os 5 minutos.** O prazo é fixo, inclusive por restrição do banco, e não há atalho de desenvolvimento. Nos testes automatizados o relógio é controlado.
 - **SQLite serializa as escritas.** É correto e suficiente para este desafio, mas limita a vazão em um cenário de pico real.
 - **Vários backends precisam compartilhar o mesmo arquivo de banco.** A proteção entre instâncias vale nessa condição; em máquinas diferentes seria preciso um banco em rede, como o PostgreSQL.
-- **Limite de envios simultâneos de imagem é por processo**, em memória. Não afeta reservas.
+- **Limites de uso valem por banco.** Os limites de reservas, conexões e envios ficam no SQLite e são compartilhados entre processos no mesmo arquivo; não valem entre máquinas com bancos separados.
 - **Datas dos eventos do seed são relativas ao dia em que ele roda.** Um banco antigo pode ter eventos já encerrados; apagar o banco e rodar de novo resolve.
-- **Há um único teste automatizado de interface**, o do conflito ao reservar. As demais telas foram verificadas manualmente.
+- **Poucos testes automatizados de interface.** Há cinco, cobrindo o conflito ao reservar, a sessão e a repetição de tentativa. As demais telas foram verificadas manualmente.
+- **Itens de baixa criticidade da revisão de segurança ficaram documentados, não corrigidos:** cabeçalhos de segurança dependem do deploy, imagens do Cloudinary são públicas e não há trilha de auditoria das ações administrativas.
 
 ## Pendências e próximos passos
 

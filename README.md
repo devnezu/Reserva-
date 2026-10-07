@@ -7,6 +7,7 @@ Projeto desenvolvido como desafio técnico de React + Node.js.
 - [Decisões e limites](DECISOES.md): estrutura, autenticação, concorrência, expiração, o que funciona e o que ficou de fora.
 - [Contrato da API](docs/API.md): rotas, exemplos de requisição e resposta, códigos de erro.
 - [Uso de IA](AI_USAGE.md): ferramentas, exemplos de interação e tempo de trabalho.
+- [Segurança](docs/SEGURANCA.md): revisão de segurança, correções aplicadas e limites de uso.
 
 ## Stack e versões
 
@@ -53,7 +54,8 @@ cp .env.example .env
 | `PORT` | `3001` | Porta do backend |
 | `DATABASE_PATH` | `./data/app.sqlite` | Arquivo do banco |
 | `APP_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Origens autorizadas a chamar a API |
-| `SEED_ON_START` | `true` fora de produção | Roda o seed ao iniciar |
+| `SEED_ON_START` | `true` fora de produção | Roda o seed ao iniciar. Em produção o seed e as contas de demonstração são recusados |
+| `TRUSTED_PROXIES` | vazio | IPs de proxy confiáveis, só se houver proxy na frente |
 | `CLOUDINARY_*` | vazio | Opcional. Só para o envio de foto de perfil e de banner |
 
 O frontend não tem variáveis de ambiente: em desenvolvimento, o Vite encaminha `/api` e `/ws` para `http://127.0.0.1:3001`.
@@ -115,14 +117,14 @@ cd Backend
 yarn test
 ```
 
-Compila o backend e roda 55 testes de integração em bancos SQLite temporários, sem tocar no banco de desenvolvimento.
+Compila o backend e roda 70 testes de integração em bancos SQLite temporários, sem tocar no banco de desenvolvimento.
 
 ```sh
 cd Frontend
 yarn test
 ```
 
-Roda o teste de interface do conflito ao reservar.
+Roda 5 testes de interface: o conflito ao reservar e casos de sessão e de repetição de tentativa.
 
 Onde está cada cenário obrigatório:
 
