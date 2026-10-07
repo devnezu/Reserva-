@@ -60,8 +60,7 @@ export function EventForm({ event, onSaved, onCancel }: { event?: EventRecord; o
   }
   const set = <Key extends keyof typeof fields>(key: Key, value: typeof fields[Key]) => setFields((current) => ({ ...current, [key]: value }))
   return <form onSubmit={(e) => { void save(e) }} className="rounded-3xl border border-black/10 bg-white p-6 sm:p-8">
-    <h2 className="text-2xl font-extrabold uppercase">{event ? 'Editar evento' : 'Novo evento'}</h2>
-    <fieldset disabled={busy} className="mt-6 grid min-w-0 gap-5 disabled:opacity-70 sm:grid-cols-2">
+    <fieldset disabled={busy} className="grid min-w-0 gap-5 disabled:opacity-70 sm:grid-cols-2">
       <label className="min-w-0 text-sm font-semibold sm:col-span-2">Título<Input value={fields.title} onChange={(e) => set('title', e.target.value)} required minLength={2} maxLength={160} className={fieldClass} /></label>
       <label className="text-sm font-semibold">Categoria<select aria-label="Categoria" value={fields.genre} onChange={(e) => set('genre', e.target.value as EventGenre)} className={`${fieldClass} block w-full border px-3`}>{Object.entries(EVENT_GENRES).map(([value, title]) => <option key={value} value={value}>{title}</option>)}</select></label>
       <label className="text-sm font-semibold">Local<Input value={fields.location} onChange={(e) => set('location', e.target.value)} required minLength={2} maxLength={200} className={fieldClass} /></label>

@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Add01Icon, ArrowUpRight01Icon, Calendar03Icon, Location01Icon, MinusSignIcon } from '@hugeicons/core-free-icons'
-import { useAuth } from '@/hooks/use-auth'
+import { Add01Icon, Calendar03Icon, Location01Icon, MinusSignIcon } from '@hugeicons/core-free-icons'
 import { useGoToAgenda } from '@/hooks/use-go-to-agenda'
 import { Button } from '@/components/ui/button'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
@@ -12,7 +11,7 @@ import { EVENT_GENRES, type EventRecord } from '@/api/events'
 import { useEvent } from '@/hooks/use-event'
 import { MarkdownContent } from '@/components/events/MarkdownContent'
 import { EVENT_STATUS, formatEventDate, formatPrice, isEventOpen } from '@/lib/events'
-import { notify } from '@/lib/notify'
+import { ReserveButton } from '@/components/reservations/ReserveButton'
 
 const MAX_TICKETS = 4
 
@@ -36,25 +35,12 @@ export default function Event() {
 }
 
 function EventDetails({ event, refreshError, onRetry }: { event: EventRecord; refreshError?: string; onRetry: () => void }) {
-  const { status } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
   const goToAgenda = useGoToAgenda()
   const [quantity, setQuantity] = useState(1)
   const open = isEventOpen(event)
   const maximum = Math.min(MAX_TICKETS, event.available)
   const selectedQuantity = Math.min(quantity, maximum)
   const totalCents = event.unitPriceCents * selectedQuantity
-
-  function buy() {
-    if (!open) return
-    if (status !== 'authenticated') {
-      notify.info('Entre na sua conta para comprar.')
-      void navigate('/acesso?modo=entrar', { state: { from: location.pathname } })
-      return
-    }
-    notify.info('A compra de ingressos estará disponível em breve.')
-  }
 
   return (
     <div className="flex min-h-svh flex-col overflow-x-clip bg-[#faf8f7] text-[#111111]">
@@ -112,9 +98,7 @@ function EventDetails({ event, refreshError, onRetry }: { event: EventRecord; re
               <p data-event-total className="text-3xl leading-none font-extrabold tracking-[-0.03em]">{formatPrice(totalCents)}</p>
             </div>
 
-            <Button type="button" disabled={!open || status === 'loading'} onClick={buy} className="mt-6 h-14 w-full gap-4 rounded-full bg-[#ED1C24] px-6 text-sm font-bold tracking-wide text-white uppercase shadow-lg shadow-[#ED1C24]/30 transition-transform duration-200 hover:scale-[1.02] hover:bg-[#d0161d] active:scale-100">
-              Comprar ingresso <HugeiconsIcon icon={ArrowUpRight01Icon} size={18} />
-            </Button>
+            <ReserveButton event={event} quantity={selectedQuantity} open={open} onRefresh={onRetry} />
           </aside>
         </div>
       </div>

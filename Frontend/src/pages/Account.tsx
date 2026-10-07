@@ -1,16 +1,14 @@
 import { useSearchParams } from 'react-router'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { ArrowUpRight01Icon, Mail01Icon, ShieldUserIcon, Ticket01Icon, UserIcon } from '@hugeicons/core-free-icons'
+import { Mail01Icon, ShieldUserIcon, UserIcon } from '@hugeicons/core-free-icons'
 import { useAuth } from '@/hooks/use-auth'
-import { useGoToAgenda } from '@/hooks/use-go-to-agenda'
-import { Button } from '@/components/ui/button'
 import AccountLayout from '@/components/AccountLayout'
 import { ProfilePhoto } from '@/components/ProfilePhoto'
 import { cn } from '@/lib/utils'
+import { MyReservations } from '@/components/reservations/MyReservations'
 
 export default function Account() {
   const { user } = useAuth()
-  const goToAgenda = useGoToAgenda()
   const [searchParams] = useSearchParams()
   const section = searchParams.get('secao') === 'eventos' ? 'eventos' : 'dados'
   const fields = [
@@ -19,10 +17,9 @@ export default function Account() {
     { label: 'E-mail', value: user?.email, icon: Mail01Icon, wide: true },
   ]
   return (
-    <AccountLayout active={section}>
+    <AccountLayout active={section} title={section === 'dados' ? <>Seus <span className="text-[#ED1C24]">dados</span></> : <>Seus <span className="text-[#ED1C24]">ingressos</span></>}>
       {section === 'dados' && (
-      <section id="seus-dados" aria-labelledby="account-data-title" className="scroll-mt-6 rounded-3xl border border-black/10 bg-white p-6 sm:p-8">
-        <h2 id="account-data-title" className="text-3xl leading-none font-extrabold tracking-[-0.03em] uppercase sm:text-4xl">Seus <span className="text-[#ED1C24]">dados</span></h2>
+      <section id="seus-dados" aria-label="Seus dados" className="scroll-mt-6 rounded-3xl border border-black/10 bg-white p-6 sm:p-8 [&>div:first-child]:mt-0">
         <ProfilePhoto />
         <dl className="mt-8 grid gap-3 md:grid-cols-2">
           {fields.map((field) => (
@@ -35,17 +32,7 @@ export default function Account() {
       </section>
       )}
 
-      {section === 'eventos' && (
-      <section id="meus-eventos" aria-labelledby="account-events-title" className="scroll-mt-6 rounded-3xl border border-black/10 bg-white p-6 sm:p-8">
-        <h2 id="account-events-title" className="text-3xl leading-none font-extrabold tracking-[-0.03em] uppercase sm:text-4xl">Meus <span className="text-[#ED1C24]">eventos</span></h2>
-        <div className="mt-8 flex flex-col items-center gap-4 bg-[#f0eceb] px-6 py-12 text-center">
-          <span className="flex size-14 items-center justify-center rounded-full bg-[#ED1C24]/10 text-[#ED1C24]"><HugeiconsIcon icon={Ticket01Icon} size={26} /></span>
-          <p className="text-lg font-extrabold uppercase">Você ainda não tem ingressos</p>
-          <p className="max-w-sm text-sm text-neutral-600">Quando você comprar um ingresso, o evento aparece aqui.</p>
-          <Button type="button" onClick={goToAgenda} className="mt-2 h-12 gap-4 rounded-full bg-[#ED1C24] px-7 text-sm font-bold tracking-wide text-white uppercase shadow-lg shadow-[#ED1C24]/30 hover:bg-[#d0161d]">Ver próximos jogos <HugeiconsIcon icon={ArrowUpRight01Icon} size={18} /></Button>
-        </div>
-      </section>
-      )}
+      {section === 'eventos' && <MyReservations />}
     </AccountLayout>
   )
 }

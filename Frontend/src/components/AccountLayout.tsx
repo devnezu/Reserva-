@@ -14,12 +14,14 @@ export type AccountSection = 'dados' | 'eventos' | 'admin'
 const ITEM_CLASS = 'flex w-full items-center gap-3 rounded-full px-5 py-3 text-left text-sm font-bold tracking-wide uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ED1C24] disabled:opacity-50'
 const SECTIONS = [
   { id: 'dados', label: 'Meus dados', to: '/conta', icon: UserCircleIcon, adminOnly: false },
-  { id: 'eventos', label: 'Meus eventos', to: '/conta?secao=eventos', icon: Ticket01Icon, adminOnly: false },
+  { id: 'eventos', label: 'Minhas reservas', to: '/conta?secao=eventos', icon: Ticket01Icon, adminOnly: false },
   { id: 'admin', label: 'Gerenciar eventos', to: '/admin/eventos', icon: Calendar03Icon, adminOnly: true },
 ] as const
 
 // Moldura das telas da conta: logo no topo, barra lateral à esquerda e o conteúdo à direita.
-export default function AccountLayout({ active, children }: { active: AccountSection; children: ReactNode }) {
+// O título fica sempre no mesmo lugar, logo abaixo do caminho; `action` ocupa o canto direito da mesma linha.
+// `trail` é o nome de uma página dentro da seção (ex.: "Sua reserva"): a seção vira link no caminho e `trail` fecha a trilha.
+export default function AccountLayout({ active, title, action, trail, children }: { active: AccountSection; title: ReactNode; action?: ReactNode; trail?: string; children: ReactNode }) {
   const { user, logout } = useAuth()
   const [busy, setBusy] = useState(false)
   const sections = SECTIONS.filter((section) => !section.adminOnly || user?.role === 'admin')
@@ -62,9 +64,15 @@ export default function AccountLayout({ active, children }: { active: AccountSec
               <BreadcrumbSeparator />
               <BreadcrumbItem>Minha conta</BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage className="font-bold text-[#111111]">{current?.label}</BreadcrumbPage></BreadcrumbItem>
+              {trail && current
+                ? <><BreadcrumbItem><BreadcrumbLink asChild className="hover:text-[#ED1C24]"><Link to={current.to}>{current.label}</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage className="font-bold text-[#111111]">{trail}</BreadcrumbPage></BreadcrumbItem></>
+                : <BreadcrumbItem><BreadcrumbPage className="font-bold text-[#111111]">{current?.label}</BreadcrumbPage></BreadcrumbItem>}
             </BreadcrumbList>
           </Breadcrumb>
+          <div className="flex min-h-12 flex-wrap items-center justify-between gap-x-6 gap-y-4">
+            <h1 className="text-3xl leading-none font-extrabold tracking-[-0.03em] uppercase sm:text-4xl">{title}</h1>
+            {action}
+          </div>
           {children}
         </main>
       </div>

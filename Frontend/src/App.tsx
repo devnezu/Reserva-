@@ -11,6 +11,7 @@ import Event from './pages/Event'
 import { RequireAuth } from '@/components/RequireAuth'
 import { RequireAdmin } from '@/components/RequireAdmin'
 import AdminEvents from './pages/AdminEvents'
+import Reservation from './pages/Reservation'
 
 export default function App() {
   const [loading, setLoading] = useState(true)
@@ -26,8 +27,10 @@ export default function App() {
           <Route path="/helloworld" element={<HelloWorld />} />
           <Route element={<RequireAuth />}>
             <Route path="/conta" element={<Account />} />
+            <Route path="/reservas/:id" element={<Reservation />} />
             <Route element={<RequireAdmin />}>
               <Route path="/admin/eventos" element={<AdminEvents />} />
+              <Route path="/admin/eventos/:id" element={<AdminEvents />} />
             </Route>
           </Route>
         </Routes>
