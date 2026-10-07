@@ -31,6 +31,8 @@ A interface utiliza componentes shadcn/ui (`Button` e `Input`), Hugeicons e Tail
 
 O backend executa migrations e o seed dos usuarios Rafael (`dry1@reservai.com`) e Gustavo (`dry2@reservai.com`) ao iniciar em desenvolvimento. Tambem e possivel executar `yarn seed` na pasta Backend. Veja `Backend/README.md` para arquitetura, endpoints e configuracao de producao.
 
+Na tela `/conta`, o usuario pode adicionar ou trocar sua foto de perfil (JPG, PNG ou WebP de ate 25 MB). O backend prepara a imagem e envia ao Cloudinary, mantendo o vinculo e os metadados no SQLite. O avatar e restaurado ao entrar e sincronizado entre abas. As credenciais do Cloudinary ficam apenas no `.env` do Backend; veja `Backend/.env.example`.
+
 O preloader roda uma vez por carregamento do aplicativo, desenha a logo vetorizada em `src/components/brand-mark.ts`, preenche de baixo para cima e revela a pagina com ondas vermelhas. O percentual e uma animacao de progresso, nao uma medicao de bytes. Aguarda o evento `load` e as fontes, com limite de 15 segundos para recursos parados. A duracao minima normal e de aproximadamente 4,75 segundos; com movimento reduzido, os atrasos visuais sao dispensados. A navegacao entre rotas nao repete o preloader.
 
 Classes reutilizaveis: `animate-marquee`, `animate-mark-draw`, `animate-mark-ink`, `animate-mark-head`, `animate-result-in`, `animate-admin-drawer-in` e `scrollbar-brand`. As fontes Figtree e Plus Jakarta Sans e o tema existente foram mantidos.

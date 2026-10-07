@@ -18,7 +18,7 @@ export function ProfilePhoto() {
     event.currentTarget.value = ''
     if (!file || submitting.current) return
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { notify.error('Escolha uma imagem JPG, PNG ou WebP.'); return }
-    if (file.size > 5 * 1024 * 1024) { notify.error('A foto deve ter no máximo 5 MB.'); return }
+    if (file.size > 25 * 1024 * 1024) { notify.error('A foto deve ter no máximo 25 MB.'); return }
     submitting.current = true
     setBusy(true)
     setPreview(URL.createObjectURL(file))
@@ -32,7 +32,7 @@ export function ProfilePhoto() {
       <UserAvatar user={user ? { ...user, avatarUrl: preview ?? user.avatarUrl } : null} className="size-24 text-3xl ring-4 ring-[#ED1C24]/15" />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold uppercase">Foto de perfil</p>
-        <p id={`${inputId}-help`} className="mt-1 text-xs text-neutral-600">JPG, PNG ou WebP. Até 5 MB.</p>
+        <p id={`${inputId}-help`} className="mt-1 text-xs text-neutral-600">JPG, PNG ou WebP. Até 25 MB.</p>
         <input ref={inputRef} id={inputId} type="file" accept="image/jpeg,image/png,image/webp" aria-label="Selecionar foto de perfil" aria-describedby={`${inputId}-help`} onChange={(event) => { void select(event) }} disabled={busy} className="sr-only" tabIndex={-1} />
         <Button type="button" variant="outline" disabled={busy} onClick={() => inputRef.current?.click()} className="mt-3 rounded-full border-[#ED1C24]/30 text-[#ED1C24] hover:bg-[#ED1C24]/5 hover:text-[#ED1C24]">{busy ? 'Enviando foto…' : user?.avatarUrl ? 'Trocar foto' : 'Adicionar foto'}</Button>
         {busy && <p role="status" className="mt-2 text-xs text-neutral-600">Salvando sua foto…</p>}

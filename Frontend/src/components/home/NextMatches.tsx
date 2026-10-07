@@ -1,10 +1,12 @@
-import { TicketAccessLink } from './TicketAccessLink'
-import { HugeiconsIcon } from '@hugeicons/react'
-import { ArrowUpRight01Icon, Calendar03Icon } from '@hugeicons/core-free-icons'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { matches } from './matches'
+import { useEvents } from '@/hooks/use-events'
+import { EventCard } from '@/components/events/EventCard'
+import { EventFilters, EventPagination } from '@/components/events/EventFilters'
 
 export default function NextMatches() {
+  const [query, setQuery] = useState({ q: '', genre: '', page: 1 })
+  const { data, error, loading, refresh } = useEvents({ ...query, pageSize: 6 })
   return (
     <section id="proximos-jogos" tabIndex={-1} aria-labelledby="next-matches-title" className="mx-auto w-full max-w-7xl scroll-mt-6 px-6 py-20 outline-none sm:px-12 lg:py-24">
       <div className="flex items-center justify-center gap-4 sm:gap-8">
@@ -13,25 +15,10 @@ export default function NextMatches() {
         <span aria-hidden="true" className="h-[3px] max-w-48 flex-1 rounded-full bg-gradient-to-l from-transparent to-[#ED1C24]" />
       </div>
 
-      <ul className="mt-12 grid gap-8 lg:grid-cols-2">
-        {matches.map((match) => (
-          <li key={match.id} className="flex flex-col overflow-hidden rounded-3xl border border-black/10 bg-white">
-            <img src={match.image} alt={`Escudos de ${match.home} e ${match.away}`} loading="lazy" className="aspect-[740/475] w-full object-cover" />
-            <div className="flex flex-1 flex-col gap-6 p-6 sm:p-8">
-              <div className="flex items-center gap-4 sm:gap-5">
-                <img src="/brasileirao-2026.svg" alt={match.competition} className="h-14 w-auto shrink-0 brightness-0 sm:h-16" />
-                <div className="min-w-0">
-                  <h3 className="text-sm leading-tight font-semibold tracking-[-0.03em] whitespace-nowrap uppercase min-[420px]:text-base sm:text-2xl lg:text-lg xl:text-[22px]">{match.home} <span className="font-light lowercase italic">x</span> {match.away}</h3>
-                  <p className="mt-2.5 inline-flex items-center gap-2 rounded-full bg-[#ED1C24]/10 px-3.5 py-1.5 text-sm font-bold text-[#ED1C24] sm:text-base"><HugeiconsIcon icon={Calendar03Icon} size={18} />{match.date} - {match.time}</p>
-                </div>
-              </div>
-              <Button asChild className="h-12 w-full gap-4 rounded-full bg-[#ED1C24] px-6 text-sm font-bold tracking-wide text-white uppercase shadow-lg shadow-[#ED1C24]/30 transition-transform duration-200 hover:scale-[1.02] hover:bg-[#d0161d] active:scale-100">
-                <TicketAccessLink>Comprar ingresso <HugeiconsIcon icon={ArrowUpRight01Icon} size={18} /></TicketAccessLink>
-              </Button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="mt-10"><EventFilters search={query.q} genre={query.genre} onSearch={(q) => setQuery({ ...query, q, page: 1 })} onGenre={(genre) => setQuery({ ...query, genre, page: 1 })} /></div>
+      {loading && <p role="status" className="py-12 text-center text-neutral-600">Carregando eventos…</p>}
+      {error && <div role="alert" className="py-12 text-center"><p>{error}</p><Button onClick={refresh} className="mt-4">Tentar novamente</Button></div>}
+      {data && <><p className="mt-6 text-sm text-neutral-500">{data.total} evento(s) encontrado(s)</p>{data.items.length ? <ul className="mt-6 grid gap-8 lg:grid-cols-2">{data.items.map((event) => <li key={event.id}><EventCard event={event} /></li>)}</ul> : <p className="py-12 text-center text-neutral-600">Nenhum evento disponível para esses filtros.</p>}<EventPagination page={query.page} pages={data.totalPages} busy={loading} onPage={(page) => setQuery({ ...query, page })} /></>}
     </section>
   )
 }

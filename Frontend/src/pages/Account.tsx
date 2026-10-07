@@ -50,6 +50,7 @@ export default function Account() {
           <nav aria-label="Seções da conta" className="mt-4 space-y-1">
             <a href="#seus-dados" aria-current="page" className={`${SIDEBAR_ITEM_CLASS} bg-[#ED1C24] text-white`}><HugeiconsIcon icon={UserCircleIcon} size={18} />Meus dados</a>
             <button type="button" onClick={goToAgenda} className={`${SIDEBAR_ITEM_CLASS} hover:bg-black/5`}><HugeiconsIcon icon={Calendar03Icon} size={18} />Próximos jogos</button>
+            {user?.role === 'admin' && <Link to="/admin/eventos" className={`${SIDEBAR_ITEM_CLASS} hover:bg-black/5`}><HugeiconsIcon icon={Calendar03Icon} size={18} />Gerenciar eventos</Link>}
           </nav>
           <div className="mt-4 border-t border-black/10 pt-4">
             <button type="button" onClick={() => { void leave() }} disabled={busy} className={`${SIDEBAR_ITEM_CLASS} text-[#ED1C24] hover:bg-[#ED1C24]/10`}><HugeiconsIcon icon={Logout01Icon} size={18} />{busy ? 'Saindo…' : 'Sair da conta'}</button>

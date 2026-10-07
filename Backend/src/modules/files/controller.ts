@@ -26,6 +26,6 @@ export async function uploadAvatar(request: IncomingMessage, response: ServerRes
     const avatarUrl = await updateAvatar(session.id, image, () => {
       if (requireAuth(request).id !== session.id) throw new HttpError(401, 'Entre novamente.', 'UNAUTHENTICATED')
     })
-    json(response, 200, { user: { id: session.id, name: session.name, email: session.email, avatarUrl } })
+    json(response, 200, { user: { id: session.id, name: session.name, email: session.email, avatarUrl, role: session.role } })
   } finally { uploading.delete(session.id) }
 }

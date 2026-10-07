@@ -29,7 +29,7 @@ export async function login(email: string, password: string, previousToken?: str
   const expiresAt = Date.now() + config.sessionDurationMs
   authRepository.createSession(tokenHash(token), user.id, expiresAt)
   revokeToken(previousToken)
-  return { token, user: { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatar_url }, expiresAt }
+  return { token, user: { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatar_url, role: user.role }, expiresAt }
 }
 
 export async function register(name: string, email: string, password: string, previousToken?: string) {

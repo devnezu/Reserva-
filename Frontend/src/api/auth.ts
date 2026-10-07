@@ -1,4 +1,4 @@
-export interface AuthUser { id: number; name: string; email: string; avatarUrl: string | null }
+export interface AuthUser { id: number; name: string; email: string; avatarUrl: string | null; role: 'admin' | 'user' }
 export interface AuthSession { user: AuthUser; expiresAt: number }
 export const SESSION_EXPIRED_EVENT = 'reservai:session-expired'
 

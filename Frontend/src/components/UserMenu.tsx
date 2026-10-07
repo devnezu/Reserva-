@@ -85,6 +85,7 @@ export default function UserMenu() {
             <motion.div id={menuId} role="menu" initial={{ height: 0, opacity: reducedMotion ? 1 : 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: reducedMotion ? 1 : 0 }} transition={{ duration: reducedMotion ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }} className="absolute top-full right-0 z-30 w-52 min-w-full overflow-hidden rounded-b-[22px] rounded-tl-[22px] bg-white text-[#111111] shadow-[0_20px_45px_-18px_rgba(0,0,0,0.45)]">
               <div className="border-t border-black/10 py-2">
                 <Link role="menuitem" to="/conta" onClick={() => setOpen(false)} className={ITEM_CLASS}><HugeiconsIcon icon={UserCircleIcon} size={18} />Ir para conta</Link>
+                {user?.role === 'admin' && <Link role="menuitem" to="/admin/eventos" onClick={() => setOpen(false)} className={ITEM_CLASS}>Gerenciar eventos</Link>}
                 <button role="menuitem" type="button" onClick={() => { void leave() }} disabled={busy} className={cn(ITEM_CLASS, 'text-[#ED1C24]')}><HugeiconsIcon icon={Logout01Icon} size={18} />{busy ? 'Saindo…' : 'Sair'}</button>
               </div>
             </motion.div>
@@ -120,6 +121,7 @@ export default function UserMenu() {
 
               <div className="mt-auto pt-10">
                 <Link to="/conta" onClick={() => setSheetOpen(false)} className={ACTION_CLASS}><HugeiconsIcon icon={UserCircleIcon} size={22} />Ir para conta</Link>
+                {user?.role === 'admin' && <Link to="/admin/eventos" onClick={() => setSheetOpen(false)} className={ACTION_CLASS}>Gerenciar eventos</Link>}
                 <button type="button" onClick={() => { void leave() }} disabled={busy} className={ACTION_CLASS}><HugeiconsIcon icon={Logout01Icon} size={22} />{busy ? 'Saindo…' : 'Sair'}</button>
               </div>
             </motion.div>

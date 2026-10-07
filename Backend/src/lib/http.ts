@@ -6,7 +6,7 @@ export function json(response: ServerResponse, status: number, data: unknown) {
   response.end(JSON.stringify(data))
 }
 
-export function readJson(request: IncomingMessage): Promise<unknown> {
+export function readJson(request: IncomingMessage, maxBytes = 4096): Promise<unknown> {
   if (request.headers['content-type']?.split(';')[0].trim() !== 'application/json') throw new HttpError(415, 'Envie os dados em JSON.')
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
@@ -15,7 +15,7 @@ export function readJson(request: IncomingMessage): Promise<unknown> {
     request.on('data', (chunk: Buffer) => {
       if (settled) return
       size += chunk.length
-      if (size > 4096) { settled = true; chunks.length = 0; reject(new HttpError(413, 'Solicitação muito grande.')); return }
+      if (size > maxBytes) { settled = true; chunks.length = 0; reject(new HttpError(413, 'Solicitação muito grande.')); return }
       chunks.push(chunk)
     })
     request.on('end', () => {

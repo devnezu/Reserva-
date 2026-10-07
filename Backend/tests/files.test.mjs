@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
+import { randomFillSync } from 'node:crypto'
 import { createServer, request as httpRequest } from 'node:http'
 import { mkdtempSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -64,7 +65,7 @@ test('Authenticated profile photos and file lifecycle', async (suite) => {
 
   await suite.test('migration preserves accounts and upload requires authentication and trusted requests', async () => {
     assert.equal(db.prepare('SELECT password_hash FROM users WHERE id = 1').get().password_hash, passwordHash)
-    assert.deepEqual(db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((row) => row.version), [1, 2])
+    assert.deepEqual(db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((row) => row.version), [1, 2, 3, 4])
     assert.equal((await me(cookie)).user.avatarUrl, null)
     assert.equal((await upload(png)).status, 401)
     assert.equal((await upload(png, cookie, { Origin: 'https://untrusted.example' })).status, 403)
@@ -77,12 +78,12 @@ test('Authenticated profile photos and file lifecycle', async (suite) => {
     assert.equal((await upload('not an image', cookie)).status, 400)
     assert.equal((await upload(png, cookie, { 'Content-Type': 'image/jpeg' })).status, 415)
     assert.equal((await upload(Buffer.alloc(0), cookie)).status, 400)
-    assert.equal((await upload(Buffer.alloc(5 * 1024 * 1024 + 1), cookie)).status, 413)
+    assert.equal((await upload(Buffer.alloc(25 * 1024 * 1024 + 1), cookie)).status, 413)
     const chunkedStatus = await new Promise((resolve, reject) => {
       const request = httpRequest(server.url + '/api/users/me/avatar', { method: 'POST', headers: { Origin: origin, 'X-Requested-With': 'Reservai', 'Content-Type': 'image/png', Cookie: cookie } }, (response) => { response.resume(); resolve(response.statusCode) })
       request.on('error', reject)
-      request.write(Buffer.alloc(3 * 1024 * 1024))
-      request.end(Buffer.alloc(3 * 1024 * 1024))
+      request.write(Buffer.alloc(13 * 1024 * 1024))
+      request.end(Buffer.alloc(13 * 1024 * 1024))
     })
     assert.equal(chunkedStatus, 413)
     assert.equal(operations().length, 0)
@@ -91,7 +92,9 @@ test('Authenticated profile photos and file lifecycle', async (suite) => {
   })
 
   await suite.test('stores a processed avatar and restores it after restart and login', async () => {
-    const response = await upload(png, cookie)
+    const largePhoto = await sharp(randomFillSync(Buffer.alloc(1600 * 1600 * 3)), { raw: { width: 1600, height: 1600, channels: 3 } }).png({ compressionLevel: 0 }).toBuffer()
+    assert.ok(largePhoto.length > 5 * 1024 * 1024 && largePhoto.length < 25 * 1024 * 1024)
+    const response = await upload(largePhoto, cookie)
     assert.equal(response.status, 200)
     const { user } = await response.json()
     assert.match(user.avatarUrl, /^https:\/\//)
@@ -124,6 +127,26 @@ test('Authenticated profile photos and file lifecycle', async (suite) => {
     server = await startServer()
     await waitFor(() => db.prepare('SELECT COUNT(*) AS count FROM file_cleanup_jobs').get().count === 0)
     assert.equal((await me(cookie)).user.avatarUrl, current.secure_url)
+  })
+
+  await suite.test('accepts high-resolution JPEG photos while distinguishing pixel limits from invalid files', async () => {
+    for (const [width, height] of [[6000, 4000], [8000, 6000]]) {
+      const jpeg = await sharp({ create: { width, height, channels: 3, background: '#ED1C24' } }).jpeg().toBuffer()
+      assert.ok(width * height > 20_000_000 && jpeg.length < 25 * 1024 * 1024)
+      assert.equal((await upload(jpeg, cookie, { 'Content-Type': 'image/jpeg' })).status, 200)
+    }
+    const forged = await sharp({ create: { width: 10, height: 10, channels: 3, background: '#ED1C24' } }).jpeg({ progressive: false }).toBuffer()
+    const frame = forged.indexOf(Buffer.from([0xff, 0xc0]))
+    assert.ok(frame >= 0)
+    forged.writeUInt16BE(10001, frame + 5)
+    forged.writeUInt16BE(10001, frame + 7)
+    const tooManyPixels = await upload(forged, cookie, { 'Content-Type': 'image/jpeg' })
+    assert.equal(tooManyPixels.status, 413)
+    assert.equal((await tooManyPixels.json()).code, 'IMAGE_RESOLUTION_TOO_LARGE')
+    const invalid = await upload('broken image', cookie, { 'Content-Type': 'image/jpeg' })
+    assert.equal(invalid.status, 400)
+    assert.equal((await invalid.json()).code, 'INVALID_IMAGE')
+    db.prepare('DELETE FROM auth_attempts WHERE key LIKE ?').run('avatar:%')
   })
 
   await suite.test('provider failure keeps the current photo and hides provider details', async () => {

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 475">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#41020d"/><stop offset="1" stop-color="#ed1c24"/></linearGradient></defs>
+  <path fill="url(#bg)" d="M0 0h740v475H0z"/>
+  <circle cx="650" cy="75" r="160" fill="#fff" opacity=".08"/><circle cx="30" cy="470" r="200" fill="#fff" opacity=".08"/>
+  <path d="M538 128v150c0 28-61 39-61 7 0-18 30-29 47-25V156l85-20v122c0 28-61 39-61 7 0-18 30-29 47-25V115z" fill="#fff" opacity=".85"/>
+  <g fill="#fff" font-family="sans-serif"><text x="65" y="105" font-size="19" letter-spacing="6">RESERVAÍ APRESENTA</text><text x="60" y="255" font-size="88" font-weight="900">NOITE</text><text x="60" y="345" font-size="88" font-weight="900">POP</text><text x="65" y="408" font-size="20">Música, encontros e novas memórias.</text></g>
+</svg>

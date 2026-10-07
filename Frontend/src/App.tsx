@@ -7,7 +7,10 @@ import HelloWorld from './pages/HelloWorld'
 import Home from './pages/Home'
 import Access from './pages/Access'
 import Account from './pages/Account'
+import Event from './pages/Event'
 import { RequireAuth } from '@/components/RequireAuth'
+import { RequireAdmin } from '@/components/RequireAdmin'
+import AdminEvents from './pages/AdminEvents'
 
 export default function App() {
   const [loading, setLoading] = useState(true)
@@ -19,9 +22,13 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/acesso" element={<Access />} />
+          <Route path="/eventos/:id" element={<Event />} />
           <Route path="/helloworld" element={<HelloWorld />} />
           <Route element={<RequireAuth />}>
             <Route path="/conta" element={<Account />} />
+            <Route element={<RequireAdmin />}>
+              <Route path="/admin/eventos" element={<AdminEvents />} />
+            </Route>
           </Route>
         </Routes>
       </PageTransition>
