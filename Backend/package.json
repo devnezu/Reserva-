@@ -9,7 +9,7 @@
         "start": "node --env-file-if-exists=.env dist/server.js",
         "typecheck": "tsc --noEmit",
         "seed": "tsx --env-file-if-exists=.env src/database/seed-cli.ts",
-        "test": "yarn build && node --test tests/auth.test.mjs"
+        "test": "yarn build && node --test tests/auth.test.mjs tests/files.test.mjs"
     },
     "devDependencies": {
         "@types/better-sqlite3": "^9.6.0",

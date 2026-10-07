@@ -80,7 +80,7 @@ test('SQLite authentication and session lifecycle', async (suite) => {
     assert.deepEqual(await invalid.json(), await unknown.json())
     assert.equal((await post('/api/auth/login', { email: 'invalid', password: 'wrong' })).status, 400)
     const session = await signIn(' DRY1@RESERVAI.COM ')
-    assert.deepEqual(session.body.user, { id: 1, name: 'Rafael', email: 'dry1@reservai.com' })
+    assert.deepEqual(session.body.user, { id: 1, name: 'Rafael', email: 'dry1@reservai.com', avatarUrl: null })
     assert.ok(!JSON.stringify(session.body).includes('password'))
     assert.match(session.response.headers.get('set-cookie'), /HttpOnly; SameSite=Lax/)
     assert.equal(session.response.headers.get('cache-control'), 'no-store')
@@ -163,7 +163,7 @@ test('SQLite authentication and session lifecycle', async (suite) => {
     const body = await response.json()
     const cookie = response.headers.get('set-cookie').split(';')[0]
     assert.deepEqual(Object.keys(body).sort(), ['expiresAt', 'user'])
-    assert.deepEqual(body.user, { id: body.user.id, name: 'Ana Silva', email: 'ana@reservai.com' })
+    assert.deepEqual(body.user, { id: body.user.id, name: 'Ana Silva', email: 'ana@reservai.com', avatarUrl: null })
     assert.match(response.headers.get('set-cookie'), /HttpOnly; SameSite=Lax/)
     assert.equal((await me(previous.cookie)).status, 401)
     assert.deepEqual((await (await me(cookie)).json()).user, body.user)

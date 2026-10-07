@@ -34,6 +34,6 @@ export const authController = {
   me(request: IncomingMessage, response: ServerResponse) {
     // A stale GET /me response must never clear a newer login cookie in another tab.
     const session = requireAuth(request)
-    json(response, 200, { user: { id: session.id, name: session.name, email: session.email }, expiresAt: session.expires_at })
+    json(response, 200, { user: { id: session.id, name: session.name, email: session.email, avatarUrl: session.avatar_url }, expiresAt: session.expires_at })
   },
 }

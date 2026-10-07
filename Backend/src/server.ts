@@ -8,10 +8,12 @@ import { app } from './app.js'
 import { requireAuth } from './middlewares/require-auth.js'
 import { authEvents } from './modules/auth/service.js'
 import { authRepository } from './modules/auth/repository.js'
+import { cleanupFiles } from './modules/files/service.js'
 
 // Migrations and development seed finish before accepting any requests.
 migrate()
 if (config.seedOnStart) await seed()
+void cleanupFiles()
 const server = createServer((request, response) => { void app(request, response) })
 server.requestTimeout = 15000
 const sockets = new WebSocketServer({ noServer: true })
@@ -42,6 +44,7 @@ authEvents.on('revoked', (hash: string) => {
 const cleanup = setInterval(() => {
   for (const [socket, hash] of sessions) if (!authRepository.getSession(hash)) socket.close(1008, 'Session expired')
   authRepository.cleanup()
+  void cleanupFiles()
 }, 30000)
 cleanup.unref()
 server.listen(config.port, config.host, () => console.log(`Backend: http://${config.host}:${config.port}`))
