@@ -18,7 +18,7 @@ const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
       className="toaster group"
       icons={{
         success: <HugeiconsIcon icon={CheckmarkCircle02Icon} />,
-        info: <img src="/Mascote.png" alt="" className="size-full scale-125 object-contain" />,
+        info: <img src="/MascoteInfo.png" alt="" className="size-full scale-125 object-contain" />,
         warning: <HugeiconsIcon icon={Alert02Icon} />,
         error: <HugeiconsIcon icon={CancelCircleIcon} />,
         loading: <HugeiconsIcon icon={Loading03Icon} className="animate-spin" />,

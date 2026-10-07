@@ -6,6 +6,8 @@ import { Toaster } from '@/components/ui/sonner'
 import HelloWorld from './pages/HelloWorld'
 import Home from './pages/Home'
 import Access from './pages/Access'
+import Account from './pages/Account'
+import { RequireAuth } from '@/components/RequireAuth'
 
 export default function App() {
   const [loading, setLoading] = useState(true)
@@ -18,6 +20,9 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/acesso" element={<Access />} />
           <Route path="/helloworld" element={<HelloWorld />} />
+          <Route element={<RequireAuth />}>
+            <Route path="/conta" element={<Account />} />
+          </Route>
         </Routes>
       </PageTransition>
       <Toaster />
