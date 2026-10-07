@@ -10,7 +10,7 @@ import { notify } from '@/lib/notify'
 import { useAuth } from '@/hooks/use-auth'
 
 const WIPE_MS = 1500
-const WIPE_TIMES = [0, 0.5, 0.6, 1]
+const WIPE_TIMES = [0, 0.48, 0.62, 1]
 
 export default function Access() {
   const { login: signIn, status } = useAuth()
@@ -107,7 +107,7 @@ export default function Access() {
               <path d="M0,0 L1440,0 L1440,60 C1380,60 1370,150 1320,150 C1270,150 1265,70 1200,70 C1140,70 1130,110 1080,110 C1030,110 1020,50 950,50 C880,50 875,140 820,140 C765,140 760,65 690,65 C620,65 615,120 560,120 C505,120 500,55 430,55 C360,55 355,155 300,155 C245,155 240,75 170,75 C110,75 100,115 60,115 C30,115 20,60 0,60 Z" />
             </motion.svg>
           </motion.div>
-          <motion.div initial={{ y: wipe.top, opacity: 1, scaleY: 1 }} animate={{ y: [wipe.top, wipe.target, wipe.target, wipe.target - 60], opacity: [1, 1, 1, 0], scaleY: [1, 1.18, 1, 1] }} transition={{ duration: WIPE_MS / 1000, times: WIPE_TIMES, ease: ['easeIn', 'linear', 'easeOut'], opacity: { duration: WIPE_MS / 1000, times: [0, 0.5, 0.6, 0.74] } }} className="absolute inset-x-0 top-0 origin-top px-8 pt-8 text-center text-white">
+          <motion.div initial={{ y: wipe.top, opacity: 1, scaleY: 1 }} animate={{ y: [wipe.top, wipe.target, wipe.target, wipe.target], opacity: [1, 1, 0, 0], scaleY: [1, 1.18, 1, 1] }} transition={{ duration: WIPE_MS / 1000, times: WIPE_TIMES, ease: ['easeIn', 'linear', 'easeOut'] }} className="absolute inset-x-0 top-0 origin-top px-8 pt-8 text-center text-white">
             <p className="text-3xl leading-[0.95] font-extrabold tracking-[-0.03em] text-balance uppercase">{wipe.title}</p>
             <p className="mt-3 text-base leading-relaxed text-white/90">{wipe.text}</p>
           </motion.div>
