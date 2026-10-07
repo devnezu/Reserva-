@@ -1,17 +1,23 @@
 import { useSearchParams } from 'react-router'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { ArrowUpRight01Icon, Mail01Icon, Ticket01Icon, UserIcon } from '@hugeicons/core-free-icons'
+import { ArrowUpRight01Icon, Mail01Icon, ShieldUserIcon, Ticket01Icon, UserIcon } from '@hugeicons/core-free-icons'
 import { useAuth } from '@/hooks/use-auth'
 import { useGoToAgenda } from '@/hooks/use-go-to-agenda'
 import { Button } from '@/components/ui/button'
 import AccountLayout from '@/components/AccountLayout'
 import { ProfilePhoto } from '@/components/ProfilePhoto'
+import { cn } from '@/lib/utils'
 
 export default function Account() {
   const { user } = useAuth()
   const goToAgenda = useGoToAgenda()
   const [searchParams] = useSearchParams()
   const section = searchParams.get('secao') === 'eventos' ? 'eventos' : 'dados'
+  const fields = [
+    { label: 'Nome', value: user?.name, icon: UserIcon, wide: false },
+    { label: 'Cargo', value: user?.role === 'admin' ? 'Administrador' : 'Usuário', icon: ShieldUserIcon, wide: false },
+    { label: 'E-mail', value: user?.email, icon: Mail01Icon, wide: true },
+  ]
   return (
     <AccountLayout active={section}>
       {section === 'dados' && (
@@ -19,14 +25,12 @@ export default function Account() {
         <h2 id="account-data-title" className="text-3xl leading-none font-extrabold tracking-[-0.03em] uppercase sm:text-4xl">Seus <span className="text-[#ED1C24]">dados</span></h2>
         <ProfilePhoto />
         <dl className="mt-8 grid gap-3 md:grid-cols-2">
-          <div className="flex items-center gap-4 bg-[#f0eceb] px-5 py-4">
-            <HugeiconsIcon icon={UserIcon} size={20} aria-hidden="true" className="shrink-0 text-neutral-500" />
-            <div className="min-w-0"><dt className="text-[11px] font-bold tracking-[0.14em] text-neutral-600 uppercase">Nome</dt><dd className="truncate text-base font-semibold">{user?.name}</dd></div>
-          </div>
-          <div className="flex items-center gap-4 bg-[#f0eceb] px-5 py-4">
-            <HugeiconsIcon icon={Mail01Icon} size={20} aria-hidden="true" className="shrink-0 text-neutral-500" />
-            <div className="min-w-0"><dt className="text-[11px] font-bold tracking-[0.14em] text-neutral-600 uppercase">E-mail</dt><dd className="truncate text-base font-semibold">{user?.email}</dd></div>
-          </div>
+          {fields.map((field) => (
+            <div key={field.label} className={cn('flex items-center gap-4 bg-[#f0eceb] px-5 py-4', field.wide && 'md:col-span-2')}>
+              <HugeiconsIcon icon={field.icon} size={20} aria-hidden="true" className="shrink-0 text-neutral-500" />
+              <div className="min-w-0"><dt className="text-[11px] font-bold tracking-[0.14em] text-neutral-600 uppercase">{field.label}</dt><dd className="truncate text-base font-semibold">{field.value}</dd></div>
+            </div>
+          ))}
         </dl>
       </section>
       )}
