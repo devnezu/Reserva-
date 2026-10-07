@@ -3,7 +3,7 @@ import { useReducedMotion } from 'motion/react'
 
 const AGENDA_ID = 'proximos-jogos'
 
-// Leva até a seção "Próximos jogos" da home, de qualquer rota.
+// Leva até a seção "Próximos eventos" da home, de qualquer rota.
 export function useGoToAgenda() {
   const navigate = useNavigate()
   const { pathname } = useLocation()

@@ -12,6 +12,7 @@ import { RequireAuth } from '@/components/RequireAuth'
 import { RequireAdmin } from '@/components/RequireAdmin'
 import AdminEvents from './pages/AdminEvents'
 import Reservation from './pages/Reservation'
+import NotFound from './pages/NotFound'
 
 export default function App() {
   const [loading, setLoading] = useState(true)
@@ -33,6 +34,7 @@ export default function App() {
               <Route path="/admin/eventos/:id" element={<AdminEvents />} />
             </Route>
           </Route>
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </PageTransition>
       <Toaster />

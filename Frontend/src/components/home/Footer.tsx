@@ -29,7 +29,7 @@ export default function Footer() {
         <nav aria-label="Rodapé" className="flex flex-col gap-4">
           <p className={HEADING_CLASS}>Navegação</p>
           <Link to="/" className={LINK_CLASS}>Início</Link>
-          <button type="button" onClick={goToAgenda} className={LINK_CLASS}>Próximos jogos</button>
+          <button type="button" onClick={goToAgenda} className={LINK_CLASS}>Próximos eventos</button>
           <Link to="/conta" className={LINK_CLASS}>Minha conta</Link>
         </nav>
 

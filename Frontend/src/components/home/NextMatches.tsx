@@ -12,7 +12,7 @@ export default function NextMatches() {
     <section id="proximos-jogos" tabIndex={-1} aria-labelledby="next-matches-title" className="mx-auto w-full max-w-7xl scroll-mt-6 px-6 py-20 outline-none sm:px-12 lg:py-24">
       <div className="flex items-center justify-center gap-4 sm:gap-8">
         <span aria-hidden="true" className="h-[3px] max-w-48 flex-1 rounded-full bg-gradient-to-r from-transparent to-[#ED1C24]" />
-        <h2 id="next-matches-title" className="text-center text-3xl leading-none font-extrabold tracking-[-0.03em] uppercase sm:text-5xl lg:text-6xl">Próximos <span className="text-[#ED1C24]">jogos</span></h2>
+        <h2 id="next-matches-title" className="text-center text-3xl leading-none font-extrabold tracking-[-0.03em] uppercase sm:text-5xl lg:text-6xl">Próximos <span className="text-[#ED1C24]">eventos</span></h2>
         <span aria-hidden="true" className="h-[3px] max-w-48 flex-1 rounded-full bg-gradient-to-l from-transparent to-[#ED1C24]" />
       </div>
 

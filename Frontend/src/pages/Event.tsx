@@ -35,7 +35,7 @@ export default function Event() {
       <div className="flex min-h-svh flex-col bg-[#faf8f7] text-[#111111]">
         <header className="mx-auto flex w-full max-w-7xl justify-center px-6 pt-7 sm:px-12 lg:justify-start"><Brand /></header>
         <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-6 px-6 py-20 text-center sm:px-12">
-          {loading ? <LoadingOverlay label="Carregando evento" /> : <><h1 className="text-4xl leading-[0.95] font-extrabold tracking-[-0.03em] uppercase sm:text-5xl">{notFound ? <>Evento não <span className="text-[#ED1C24]">encontrado</span></> : 'Não foi possível carregar o evento'}</h1><p role={notFound ? undefined : 'alert'} className="text-base text-neutral-700 sm:text-lg">{notFound ? 'Este evento não existe ou não está mais disponível.' : error}</p>{!notFound && <Button onClick={refresh} variant="outline">Tentar novamente</Button>}<Button onClick={goToAgenda} className="h-12 rounded-full bg-[#ED1C24] px-8 text-sm font-bold tracking-wide text-white uppercase hover:bg-[#d0161d]">Ver próximos jogos</Button></>}
+          {loading ? <LoadingOverlay label="Carregando evento" /> : <><h1 className="text-4xl leading-[0.95] font-extrabold tracking-[-0.03em] uppercase sm:text-5xl">{notFound ? <>Evento não <span className="text-[#ED1C24]">encontrado</span></> : 'Não foi possível carregar o evento'}</h1><p role={notFound ? undefined : 'alert'} className="text-base text-neutral-700 sm:text-lg">{notFound ? 'Este evento não existe ou não está mais disponível.' : error}</p>{!notFound && <Button onClick={refresh} variant="outline">Tentar novamente</Button>}<Button onClick={goToAgenda} className="h-12 rounded-full bg-[#ED1C24] px-8 text-sm font-bold tracking-wide text-white uppercase hover:bg-[#d0161d]">Ver próximos eventos</Button></>}
         </main>
         <Footer />
       </div>
@@ -72,7 +72,7 @@ function EventDetails({ event, refreshError, onRetry }: { event: EventRecord; re
           <BreadcrumbList className="text-neutral-600">
             <BreadcrumbItem><BreadcrumbLink asChild className="hover:text-[#ED1C24]"><Link to="/">Início</Link></BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbLink asChild className="hover:text-[#ED1C24]"><button type="button" onClick={goToAgenda}>Próximos jogos</button></BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink asChild className="hover:text-[#ED1C24]"><button type="button" onClick={goToAgenda}>Próximos eventos</button></BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbPage className="font-bold text-[#111111]">{event.title}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
