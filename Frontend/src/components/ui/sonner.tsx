@@ -8,26 +8,33 @@ import {
 } from "@hugeicons/core-free-icons"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
-const Toaster = ({ ...props }: ToasterProps) => {
+const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
   return (
     <Sonner
       theme="light"
+      position="top-center"
       className="toaster group"
       icons={{
-        success: <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4" />,
-        info: <HugeiconsIcon icon={InformationCircleIcon} className="size-4" />,
-        warning: <HugeiconsIcon icon={Alert02Icon} className="size-4" />,
-        error: <HugeiconsIcon icon={CancelCircleIcon} className="size-4" />,
-        loading: <HugeiconsIcon icon={Loading03Icon} className="size-4 animate-spin" />,
+        success: <HugeiconsIcon icon={CheckmarkCircle02Icon} />,
+        info: <HugeiconsIcon icon={InformationCircleIcon} />,
+        warning: <HugeiconsIcon icon={Alert02Icon} />,
+        error: <HugeiconsIcon icon={CancelCircleIcon} />,
+        loading: <HugeiconsIcon icon={Loading03Icon} className="animate-spin" />,
       }}
-      style={
-        {
-          "--normal-bg": "#ffffff",
-          "--normal-text": "var(--foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
-        } as React.CSSProperties
-      }
+      toastOptions={{
+        unstyled: true,
+        ...toastOptions,
+        classNames: {
+          toast:
+            "group/toast flex w-full items-center gap-4 rounded-3xl border border-black/10 bg-white py-3.5 pr-6 pl-3.5 font-sans text-[#111111] shadow-[0_20px_45px_-18px_rgba(0,0,0,0.45)] sm:w-[var(--width)]",
+          icon:
+            "flex size-11 shrink-0 items-center justify-center rounded-full bg-[#111111] text-white [&_svg]:size-5 group-data-[type=error]/toast:bg-[#ED1C24] group-data-[type=success]/toast:bg-emerald-600 group-data-[type=warning]/toast:bg-amber-500",
+          content: "flex min-w-0 flex-col gap-0.5",
+          title: "text-sm leading-tight font-extrabold tracking-[0.02em] uppercase",
+          description: "text-sm leading-snug text-neutral-600",
+          ...toastOptions?.classNames,
+        },
+      }}
       {...props}
     />
   )
