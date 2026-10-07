@@ -89,6 +89,6 @@ test('Event-page migration upgrades existing data without replacing user edits o
     assert.equal((await get('spfc-vitoria')).unitPriceCents, 4250)
     assert.equal((await get('spfc-vasco')).content, before[1].content)
     assert.equal((await get('noite-pop')).capacity, 2)
-    assert.deepEqual(db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((row) => row.version), [1, 2, 3, 4, 5])
+    assert.deepEqual(db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((row) => row.version), [1, 2, 3, 4, 5, 6])
   })
 })

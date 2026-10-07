@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { database } from '../../database/connection.js'
+import { notifyInventory } from '../events/inventory.js'
 
 export const filesRepository = {
   replaceEventBanner(eventId: number, userId: number, publicId: string, url: string, bytes: number, width: number, height: number) {
@@ -8,6 +9,7 @@ export const filesRepository = {
       const id = randomUUID()
       database.prepare('INSERT INTO files (id, user_id, public_id, secure_url, mime_type, bytes, width, height, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(id, userId, publicId, url, 'image/webp', bytes, width, height, Date.now())
       database.prepare('UPDATE events SET banner_file_id = ?, banner_url = NULL, published = 1, updated_at = ? WHERE id = ?').run(id, Date.now(), eventId)
+      notifyInventory(eventId, Date.now())
       if (previous) {
         database.prepare('INSERT OR IGNORE INTO file_cleanup_jobs (public_id, created_at) VALUES (?, ?)').run(previous.public_id, Date.now())
         database.prepare('DELETE FROM files WHERE id = ?').run(previous.id)

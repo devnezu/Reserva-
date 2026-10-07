@@ -1,6 +1,6 @@
 # Backend Reservaí
 
-HTTP nativo do Node + TypeScript + SQLite. Implementa cadastro, autenticacao por e-mail e senha, sessoes persistentes, eventos com RBAC e WebSocket autenticado.
+HTTP nativo do Node + TypeScript + SQLite. Implementa cadastro, autenticacao por e-mail e senha, sessoes persistentes, eventos com RBAC, reservas por 5 minutos e WebSocket autenticado. O fluxo de reservas, concorrencia, idempotencia, endpoints e mensagens WS esta documentado em [docs/reservations.md](docs/reservations.md).
 
 ```sh
 yarn install
@@ -114,4 +114,4 @@ O seed cria tres eventos futuros uma unica vez, incluindo o evento Pop com capac
 
 Os testes de eventos cobrem RBAC, seed idempotente, valores em centavos, conteudo, paginacao, filtros, datas, capacidade, arquivamento e ciclo de vida de banners, com SQLite temporario e Cloudinary simulado.
 
-A pagina individual do evento consulta a API publica, com banner, titulo, categoria, local, datas, preco, capacidade, prazo e conteudo atuais. O total e calculado em centavos inteiros (preco unitario x quantidade). A quantidade respeita a disponibilidade e o limite de 4 por compra exibido no conteudo original. Visitantes podem consultar o evento; o botao de compra exige login. Os antigos precos de setores fixos foram substituidos pelo preco unitario do banco. A efetivacao de compra/reserva de ingressos ainda sera implementada. Recuperacao de senha nao faz parte dos planos do projeto.
+A pagina individual do evento consulta a API publica, com banner, titulo, categoria, local, datas, preco, capacidade, prazo e conteudo atuais. O total e calculado em centavos inteiros (preco unitario x quantidade). A quantidade respeita a disponibilidade e o limite de 4 por reserva. Visitantes podem consultar o evento; reservar exige login. O botao cria uma reserva PENDENTE e abre `/reservas/:id`, com contagem regressiva de 5 minutos, confirmar compra simulada ou cancelar. `/conta?secao=eventos` exibe Minhas reservas com os estados efetivos apenas do usuario autenticado. Disponibilidade e reservas recebem atualizacoes por WS; a recuperacao de conexao consulta novamente o servidor. Recuperacao de senha nao faz parte dos planos do projeto.

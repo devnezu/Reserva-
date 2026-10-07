@@ -7,6 +7,7 @@ import { join } from 'node:path'
 import { createServer } from 'node:net'
 import Database from 'better-sqlite3'
 import sharp from 'sharp'
+import { randomUUID } from 'node:crypto'
 
 const directory = mkdtempSync(join(tmpdir(), 'reservai-events-test-'))
 const databasePath = join(directory, 'app.sqlite')
@@ -163,7 +164,8 @@ test('Dynamic events, money, RBAC and banners', async (suite) => {
     await waitFor(() => operations().some((op) => op.action === 'remove' && op.publicId === oldPublicId))
   })
   await suite.test('availability and expiry are dynamic, capacity cannot fall below reservations, archive survives reseeding', async () => {
-    db.prepare('UPDATE events SET reserved_count = 2 WHERE id = ?').run(event.id)
+    const holdAt = Date.now()
+    db.prepare("INSERT INTO reservations (id, user_id, event_id, quantity, status, unit_price_cents, total_cents, created_at, updated_at, expires_at) VALUES (?, ?, ?, 2, 'PENDENTE', 3450, 6900, ?, ?, ?)").run(randomUUID(), user.user.id, event.id, holdAt, holdAt, holdAt + 300000)
     const soldOut = await get(event.id)
     assert.equal(soldOut.available, 0)
     assert.equal(soldOut.status, 'sold_out')

@@ -1,0 +1,59 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { randomUUID } from 'node:crypto'
+import { mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
+process.env.DATABASE_PATH = join(mkdtempSync(join(tmpdir(), 'reservai-reservation-boundaries-')), 'app.sqlite')
+const { database } = await import('../dist/database/connection.js')
+const { migrate } = await import('../dist/database/migrate.js')
+const { seed } = await import('../dist/database/seed.js')
+const { reservationsRepository: reservations } = await import('../dist/modules/reservations/repository.js')
+const { inventory } = await import('../dist/modules/events/inventory.js')
+migrate(); await seed()
+const event = database.prepare("SELECT id FROM events WHERE seed_key = 'demo-spfc-vitoria'").get().id
+const user = database.prepare("SELECT id FROM users WHERE email = 'dry1@reservai.com'").get().id
+
+test('Server clock boundaries and expiry without a worker', async (suite) => {
+  suite.after(() => database.close())
+  const now = Date.now()
+  const make = (time = now) => reservations.create(user, event, 1, randomUUID(), () => time).body.reservation
+  await suite.test('expires exactly at 5 minutes, not a millisecond later; conflicts persist EXPIRADA', () => {
+    const valid = make()
+    assert.equal(reservations.transition(user, valid.id, 'confirm', randomUUID(), () => valid.expiresAt - 1).body.reservation.status, 'CONFIRMADA')
+    for (const action of ['confirm', 'cancel']) {
+      const expiring = make()
+      const result = reservations.transition(user, expiring.id, action, randomUUID(), () => expiring.expiresAt)
+      assert.equal(result.status, 409); assert.equal(result.body.code, 'RESERVATION_EXPIRED')
+      assert.equal(database.prepare('SELECT status FROM reservations WHERE id = ?').get(expiring.id).status, 'EXPIRADA')
+    }
+  })
+  await suite.test('expired pending rows immediately stop occupying capacity even without expiry persistence', () => {
+    const pending = make(now - 360000)
+    assert.equal(database.prepare('SELECT status FROM reservations WHERE id = ?').get(pending.id).status, 'PENDENTE')
+    const count = database.prepare("SELECT SUM(quantity) AS count FROM reservations WHERE event_id = ? AND status = 'CONFIRMADA'").get(event).count
+    assert.equal(inventory(event, now).reservedCount, count)
+    const value = reservations.get(user, pending.id, () => now)
+    assert.equal(value.reservation.status, 'EXPIRADA')
+    assert.equal(inventory(event, now).reservedCount, count)
+  })
+  await suite.test('an idempotent retry after expiry returns the same expired reservation without a new hold', () => {
+    const key = randomUUID()
+    const initial = reservations.create(user, event, 1, key, () => now).body.reservation
+    const repeated = reservations.create(user, event, 1, key, () => initial.expiresAt)
+    assert.equal(repeated.status, 200); assert.equal(repeated.body.reservation.id, initial.id)
+    assert.equal(repeated.body.reservation.status, 'EXPIRADA')
+    assert.equal(repeated.body.reservation.createdAt, initial.createdAt)
+  })
+  await suite.test('failure to record a notification rolls back the reservation and its idempotency key', () => {
+    const key = randomUUID()
+    const before = inventory(event, now).reservedCount
+    database.exec("CREATE TRIGGER test_outbox_failure BEFORE INSERT ON realtime_outbox BEGIN SELECT RAISE(ABORT, 'TEST_OUTBOX_FAILURE'); END;")
+    try { assert.throws(() => reservations.create(user, event, 1, key, () => now), /TEST_OUTBOX_FAILURE/) }
+    finally { database.exec('DROP TRIGGER test_outbox_failure') }
+    assert.equal(inventory(event, now).reservedCount, before)
+    assert.equal(database.prepare('SELECT COUNT(*) AS total FROM reservation_requests WHERE request_key = ?').get(key).total, 0)
+    assert.equal(reservations.create(user, event, 1, key, () => now).status, 201)
+  })
+})
