@@ -101,16 +101,16 @@ export default function UserMenu() {
         </AnimatePresence>
       </div>
 
-      <button type="button" aria-label="Abrir menu" aria-haspopup="dialog" aria-expanded={sheetOpen} aria-controls={sheetId} onClick={() => setSheetOpen(true)} className="flex size-11 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/35 backdrop-blur-sm transition-colors hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:hidden">
-        <HugeiconsIcon icon={Menu01Icon} size={22} />
+      <button type="button" aria-label="Abrir menu" aria-haspopup="dialog" aria-expanded={sheetOpen} aria-controls={sheetId} onClick={() => setSheetOpen(true)} className="flex size-11 items-center justify-center rounded-full text-white transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:hidden">
+        <HugeiconsIcon icon={Menu01Icon} size={28} />
       </button>
       {createPortal(
         <AnimatePresence>
           {sheetOpen && (
             <motion.div id={sheetId} role="dialog" aria-modal="true" aria-label="Menu" initial={reducedMotion ? { opacity: 0 } : { x: '100%' }} animate={reducedMotion ? { opacity: 1 } : { x: 0 }} exit={reducedMotion ? { opacity: 0 } : { x: '100%' }} transition={{ duration: reducedMotion ? 0.01 : 0.38, ease: [0.22, 1, 0.36, 1] }} className="fixed inset-0 z-[80] flex flex-col overflow-y-auto bg-[#ED1C24] px-6 pt-7 pb-10 text-white md:hidden">
               <div className="flex justify-end">
-                <button ref={closeRef} type="button" aria-label="Fechar menu" onClick={() => setSheetOpen(false)} className="flex size-11 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/35 transition-colors hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-                  <HugeiconsIcon icon={Cancel01Icon} size={22} />
+                <button ref={closeRef} type="button" aria-label="Fechar menu" onClick={() => setSheetOpen(false)} className="flex size-11 items-center justify-center rounded-full transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  <HugeiconsIcon icon={Cancel01Icon} size={28} />
                 </button>
               </div>
 
