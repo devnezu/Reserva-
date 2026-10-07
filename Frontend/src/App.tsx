@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router'
 import { useCallback, useState } from 'react'
 import { Preloader } from '@/components/preloader'
 import { PageTransition } from '@/components/page-transition'
+import { Toaster } from '@/components/ui/sonner'
 import HelloWorld from './pages/HelloWorld'
 import Home from './pages/Home'
 import Access from './pages/Access'
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/helloworld" element={<HelloWorld />} />
         </Routes>
       </PageTransition>
+      <Toaster />
     </>
   )
 }
