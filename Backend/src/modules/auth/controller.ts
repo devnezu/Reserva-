@@ -4,10 +4,18 @@ import { requireAuth } from '../../middlewares/require-auth.js'
 import { requireTrustedRequest } from '../../middlewares/csrf.js'
 import { limitLogin } from '../../middlewares/login-rate-limit.js'
 import { clearSessionCookie, getToken, setSessionCookie } from './cookies.js'
-import { parseLogin } from './schemas.js'
-import { login, revokeToken } from './service.js'
+import { parseLogin, parseRegister } from './schemas.js'
+import { login, register, revokeToken } from './service.js'
 
 export const authController = {
+  async register(request: IncomingMessage, response: ServerResponse) {
+    requireTrustedRequest(request)
+    const body = parseRegister(await readJson(request))
+    limitLogin(request.socket.remoteAddress ?? 'unknown', body.email, 'register')
+    const session = await register(body.name, body.email, body.password, getToken(request))
+    setSessionCookie(response, session.token, session.expiresAt)
+    json(response, 201, { user: session.user, expiresAt: session.expiresAt })
+  },
   async login(request: IncomingMessage, response: ServerResponse) {
     requireTrustedRequest(request)
     const body = parseLogin(await readJson(request))

@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useSearchParams } from 'react-router'
+import { Navigate, useSearchParams } from 'react-router'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { UserIcon, Mail01Icon, LockPasswordIcon } from '@hugeicons/core-free-icons'
@@ -13,8 +13,7 @@ const WIPE_MS = 1500
 const WIPE_TIMES = [0, 0.48, 0.62, 1]
 
 export default function Access() {
-  const { login: signIn, status } = useAuth()
-  const location = useLocation()
+  const { login: signIn, register, status } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const login = searchParams.get('modo') === 'entrar'
   const [busy, setBusy] = useState(false)
@@ -44,23 +43,24 @@ export default function Access() {
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!login) { notify.info('O cadastro estará disponível em breve.'); return }
     if (submitting.current) return
     submitting.current = true
     setBusy(true)
     const form = event.currentTarget
     const data = new FormData(form)
     try {
-      await signIn(String(data.get('email') ?? ''), String(data.get('password') ?? ''))
+      const email = String(data.get('email') ?? '')
+      const password = String(data.get('password') ?? '')
+      if (login) await signIn(email, password)
+      else await register(String(data.get('name') ?? ''), email, password)
       form.reset()
-      notify.success('Acesso confirmado.')
+      notify.success(login ? 'Acesso confirmado.' : 'Conta criada. Seja bem-vindo!')
     } catch (error) {
       notify.error(error instanceof Error && error.name !== 'TypeError' ? error.message : 'Não foi possível conectar. Tente novamente.')
     } finally { submitting.current = false; setBusy(false) }
   }
 
-  const from = (location.state as { from?: string } | null)?.from
-  if (status === 'authenticated') return <Navigate to={typeof from === 'string' && /^\/conta(?:[?#]|$)/.test(from) ? from : '/conta'} replace />
+  if (status === 'authenticated') return <Navigate to="/" replace />
 
   const panelContent = (
     <>
@@ -125,10 +125,10 @@ export default function Access() {
               <p className="mt-4 text-base text-neutral-700 sm:text-lg">{login ? 'Entre para viver sua próxima experiência' : 'Preencha seus dados e venha viver o novo'}</p>
             </div>
             <form onSubmit={submit} className="mx-auto max-w-[420px] space-y-3">
-              {!login && <div className="relative"><label className="sr-only" htmlFor="name">Nome completo</label><HugeiconsIcon icon={UserIcon} size={18} aria-hidden="true" className="pointer-events-none absolute top-1/2 left-5 z-10 -translate-y-1/2 text-neutral-500" /><Input id="name" name="name" placeholder="Nome completo" autoComplete="name" required minLength={2} className="h-14 rounded-none border-0 bg-[#f0eceb] pl-14 text-base shadow-none md:text-base placeholder:text-neutral-500" /></div>}
+              {!login && <div className="relative"><label className="sr-only" htmlFor="name">Nome completo</label><HugeiconsIcon icon={UserIcon} size={18} aria-hidden="true" className="pointer-events-none absolute top-1/2 left-5 z-10 -translate-y-1/2 text-neutral-500" /><Input id="name" name="name" placeholder="Nome completo" autoComplete="name" required minLength={2} maxLength={100} className="h-14 rounded-none border-0 bg-[#f0eceb] pl-14 text-base shadow-none md:text-base placeholder:text-neutral-500" /></div>}
               <div className="relative"><label className="sr-only" htmlFor="email">E-mail</label><HugeiconsIcon icon={Mail01Icon} size={18} aria-hidden="true" className="pointer-events-none absolute top-1/2 left-5 z-10 -translate-y-1/2 text-neutral-500" /><Input id="email" name="email" type="email" placeholder="E-mail" autoComplete="email" required className="h-14 rounded-none border-0 bg-[#f0eceb] pl-14 text-base shadow-none md:text-base placeholder:text-neutral-500" /></div>
               <div className="relative"><label className="sr-only" htmlFor="password">Senha</label><HugeiconsIcon icon={LockPasswordIcon} size={18} aria-hidden="true" className="pointer-events-none absolute top-1/2 left-5 z-10 -translate-y-1/2 text-neutral-500" /><Input id="password" name="password" type="password" placeholder={login ? 'Senha' : 'Senha (mínimo de 8 caracteres)'} autoComplete={login ? 'current-password' : 'new-password'} minLength={login ? undefined : 8} required maxLength={128} className="h-14 rounded-none border-0 bg-[#f0eceb] pl-14 text-base shadow-none md:text-base placeholder:text-neutral-500" /></div>
-              <div className="pt-7 text-center"><Button type="submit" disabled={busy || (login && status === 'loading')} className="h-14 min-w-[220px] rounded-full bg-[#ED1C24] px-10 text-sm font-bold tracking-wide text-white shadow-lg shadow-[#ED1C24]/30 hover:bg-[#d0161d]">{busy ? 'ENTRANDO…' : login ? 'ENTRAR' : 'CADASTRAR'}</Button></div>
+              <div className="pt-7 text-center"><Button type="submit" disabled={busy || status === 'loading'} className="h-14 min-w-[220px] rounded-full bg-[#ED1C24] px-10 text-sm font-bold tracking-wide text-white shadow-lg shadow-[#ED1C24]/30 hover:bg-[#d0161d]">{busy ? login ? 'ENTRANDO…' : 'CRIANDO CONTA…' : login ? 'ENTRAR' : 'CADASTRAR'}</Button></div>
             </form>
           </motion.div>
         </AnimatePresence>

@@ -29,5 +29,6 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
 export const authApi = {
   me: () => apiRequest<AuthSession>('/api/auth/me'),
   login: (email: string, password: string) => apiRequest<AuthSession>('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  register: (name: string, email: string, password: string) => apiRequest<AuthSession>('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
   logout: () => apiRequest<void>('/api/auth/logout', { method: 'POST' }),
 }

@@ -2,10 +2,11 @@ import { createHash } from 'node:crypto'
 import { database } from '../database/connection.js'
 import { HttpError } from './error-handler.js'
 
-export function limitLogin(ip: string, email: string) {
+export function limitLogin(ip: string, email: string, action: 'login' | 'register' = 'login') {
   const now = Date.now()
   database.prepare('DELETE FROM auth_attempts WHERE expires_at <= ?').run(now)
-  const keys = [{ key: `ip:${ip}`, limit: 30 }, { key: `email:${createHash('sha256').update(email).digest('hex')}`, limit: 10 }]
+  const prefix = action === 'register' ? 'register:' : ''
+  const keys = [{ key: `${prefix}ip:${ip}`, limit: 30 }, { key: `${prefix}email:${createHash('sha256').update(email).digest('hex')}`, limit: 10 }]
   database.transaction(() => {
     for (const { key, limit } of keys) {
       const row = database.prepare('SELECT count FROM auth_attempts WHERE key = ?').get(key) as { count: number } | undefined

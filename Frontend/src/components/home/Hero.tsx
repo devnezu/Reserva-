@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { TicketAccessLink } from './TicketAccessLink'
 import { motion, useReducedMotion } from 'motion/react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowUpRight01Icon, Calendar03Icon } from '@hugeicons/core-free-icons'
@@ -21,11 +21,11 @@ export default function Hero() {
           <p className="inline-flex items-center gap-2.5 rounded-full bg-white/15 px-4 py-2 text-base font-bold ring-1 ring-white/35 backdrop-blur-sm sm:text-lg"><HugeiconsIcon icon={Calendar03Icon} size={20} />{featuredMatch.date} - {featuredMatch.time}</p>
         </div>
         <Button asChild className="group relative mt-8 h-16 gap-5 rounded-full bg-white pr-2.5 pl-8 text-base font-bold tracking-wide text-black uppercase shadow-[0_14px_40px_-10px_rgba(0,0,0,0.7)] transition-transform duration-200 hover:scale-[1.04] hover:bg-white active:scale-100">
-          <Link to="/acesso">
+          <TicketAccessLink>
             {!reducedMotion && <motion.span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-full" animate={{ boxShadow: ['0 0 0 0 rgba(255,255,255,0.6)', '0 0 0 18px rgba(255,255,255,0)'] }} transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut' }} />}
             Comprar ingresso
             <span className="flex size-11 items-center justify-center rounded-full bg-[#ED1C24] text-white transition-transform duration-200 group-hover:rotate-45"><HugeiconsIcon icon={ArrowUpRight01Icon} className="size-5!" /></span>
-          </Link>
+          </TicketAccessLink>
         </Button>
       </motion.div>
     </section>

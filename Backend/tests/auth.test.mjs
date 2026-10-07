@@ -144,4 +144,60 @@ test('SQLite authentication and session lifecycle', async (suite) => {
       assert.match(response.headers.get('set-cookie'), /; Secure/)
     } finally { await stopServer(production) }
   })
+
+  await suite.test('registration validates input and trusted origins before creating accounts', async () => {
+    const before = db.prepare('SELECT COUNT(*) AS count FROM users').get().count
+    const body = { name: 'Ana Silva', email: 'ana@reservai.com', password: 'newpassword123' }
+    assert.equal((await post('/api/auth/register', body, undefined, { Origin: 'https://untrusted.example' })).status, 403)
+    assert.equal((await post('/api/auth/register', body, undefined, { 'X-Requested-With': '' })).status, 403)
+    for (const invalid of [null, [], { ...body, name: ' ' }, { ...body, name: 'a'.repeat(101) }, { ...body, name: 'Ana\nSilva' }, { ...body, email: 'invalid' }, { ...body, password: 'short' }, { ...body, password: 'a'.repeat(129) }]) {
+      assert.equal((await post('/api/auth/register', invalid)).status, 400)
+    }
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM users').get().count, before)
+  })
+
+  await suite.test('registration hashes the password, starts a session and persists the account', async () => {
+    const previous = await signIn()
+    const response = await post('/api/auth/register', { name: '  Ana Silva  ', email: ' ANA@RESERVAI.COM ', password: 'newpassword123' }, previous.cookie)
+    assert.equal(response.status, 201)
+    const body = await response.json()
+    const cookie = response.headers.get('set-cookie').split(';')[0]
+    assert.deepEqual(Object.keys(body).sort(), ['expiresAt', 'user'])
+    assert.deepEqual(body.user, { id: body.user.id, name: 'Ana Silva', email: 'ana@reservai.com' })
+    assert.match(response.headers.get('set-cookie'), /HttpOnly; SameSite=Lax/)
+    assert.equal((await me(previous.cookie)).status, 401)
+    assert.deepEqual((await (await me(cookie)).json()).user, body.user)
+    const user = db.prepare('SELECT * FROM users WHERE email = ?').get('ana@reservai.com')
+    assert.match(user.password_hash, /^\$argon2id\$/)
+    assert.ok(await verify(user.password_hash, 'newpassword123'))
+    await stopServer(server)
+    server = await startServer()
+    assert.equal((await me(cookie)).status, 200)
+    await post('/api/auth/logout', undefined, cookie)
+    assert.equal((await me(cookie)).status, 401)
+    assert.equal((await signIn('ana@reservai.com', 'newpassword123')).body.user.id, user.id)
+  })
+
+  await suite.test('duplicate and concurrent registrations never overwrite an existing account', async () => {
+    const session = await signIn()
+    const existing = db.prepare('SELECT * FROM users WHERE email = ?').get('dry1@reservai.com')
+    const duplicate = await post('/api/auth/register', { name: 'Replacement', email: 'DRY1@RESERVAI.COM', password: 'replacement123' }, session.cookie)
+    assert.equal(duplicate.status, 409)
+    assert.equal((await duplicate.json()).code, 'EMAIL_IN_USE')
+    assert.equal(duplicate.headers.get('set-cookie'), null)
+    assert.deepEqual(db.prepare('SELECT * FROM users WHERE email = ?').get('dry1@reservai.com'), existing)
+    assert.equal((await me(session.cookie)).status, 200)
+    const body = { name: 'Concurrent User', email: 'concurrent@reservai.com', password: 'concurrent123' }
+    const responses = await Promise.all([post('/api/auth/register', body), post('/api/auth/register', body)])
+    assert.deepEqual(responses.map((response) => response.status).sort(), [201, 409])
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM users WHERE email = ?').get(body.email).count, 1)
+  })
+
+  await suite.test('registration attempts are limited independently from login', async () => {
+    db.prepare('DELETE FROM auth_attempts').run()
+    const body = { name: 'Duplicate', email: 'dry1@reservai.com', password: 'duplicate123' }
+    for (let index = 0; index < 10; index++) assert.equal((await post('/api/auth/register', body)).status, 409)
+    assert.equal((await post('/api/auth/register', body)).status, 429)
+    assert.equal((await signIn()).body.user.name, 'Rafael')
+  })
 })

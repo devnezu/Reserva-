@@ -31,16 +31,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const login = useCallback(async (email: string, password: string) => {
+  const authenticate = useCallback(async (request: () => Promise<AuthSession>) => {
     mutation.current = true
     generation.current++
     try {
-      const session = await authApi.login(email, password)
+      const session = await request()
       generation.current++
       setState({ ...session, status: 'authenticated' })
       syncTabs()
     } finally { mutation.current = false }
   }, [syncTabs])
+
+  const login = useCallback((email: string, password: string) => authenticate(() => authApi.login(email, password)), [authenticate])
+  const register = useCallback((name: string, email: string, password: string) => authenticate(() => authApi.register(name, email, password)), [authenticate])
 
   const logout = useCallback(async () => {
     mutation.current = true
@@ -89,5 +92,5 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer)
   }, [state.expiresAt, refresh])
 
-  return <AuthContext value={{ ...state, login, logout, refresh }}>{children}</AuthContext>
+  return <AuthContext value={{ ...state, login, register, logout, refresh }}>{children}</AuthContext>
 }

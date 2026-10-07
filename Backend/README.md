@@ -1,6 +1,6 @@
 # Backend Reservaí
 
-HTTP nativo do Node + TypeScript + SQLite. A primeira etapa implementa autenticacao por e-mail e senha, sessoes persistentes e WebSocket autenticado.
+HTTP nativo do Node + TypeScript + SQLite. Implementa cadastro, autenticacao por e-mail e senha, sessoes persistentes e WebSocket autenticado.
 
 ```sh
 yarn install
@@ -44,14 +44,17 @@ src/
 
 | Metodo | Endpoint | Resultado |
 | --- | --- | --- |
+| POST | /api/auth/register | Recebe `{ name, email, password }`; cria conta e sessao, responde 201 com `{ user, expiresAt }` e cookie |
 | POST | /api/auth/login | Recebe `{ email, password }`; responde `{ user, expiresAt }` e cookie |
 | GET | /api/auth/me | Consulta a sessao; responde 401 se ausente ou expirada |
 | POST | /api/auth/logout | Revoga a sessao e apaga o cookie; responde 204 |
 
-O frontend usa o proxy do Vite, `credentials: include` e `X-Requested-With: Reservai`. Requisicoes POST devem conter uma origem listada em `APP_ORIGINS`. Nao ha CORS permissivo. A cookie `reservai_session` e HttpOnly, SameSite=Lax e Secure em producao; dura sete dias. Somente o hash SHA-256 do token aleatorio fica no SQLite. Um novo login no mesmo navegador revoga a sessao anterior. Logout e expiracao tambem encerram o WebSocket correspondente.
+O cadastro exige nome entre 2 e 100 caracteres, e-mail valido e senha entre 8 e 128 caracteres. E-mails sao normalizados e unicos; duplicados respondem 409 (`EMAIL_IN_USE`), sem alterar a conta existente. Conta e sessao sao criadas na mesma transacao. Login e cadastro possuem limites de tentativas independentes e compartilham o limite de operacoes Argon2 simultaneas.
+
+O frontend usa o proxy do Vite, `credentials: include` e `X-Requested-With: Reservai`. Requisicoes POST devem conter uma origem listada em `APP_ORIGINS`. Nao ha CORS permissivo. A cookie `reservai_session` e HttpOnly, SameSite=Lax e Secure em producao; dura sete dias. Somente o hash SHA-256 do token aleatorio fica no SQLite. Um novo login ou cadastro no mesmo navegador revoga a sessao anterior. Logout e expiracao tambem encerram o WebSocket correspondente.
 
 Em producao: use HTTPS, configure `APP_ORIGINS` com a origem real, `NODE_ENV=production` e `SEED_ON_START=false`. O seed automatico ja vem desativado por padrao em producao. Encaminhe `/api` e `/ws` pela mesma origem do frontend. O servidor escuta em 127.0.0.1 por padrao; configure `HOST` se necessario. Os limites usam o endereco do socket, sem confiar em `X-Forwarded-For`; atras de um proxy, o limite por IP sera compartilhado pelos visitantes desse proxy.
 
-`yarn test` compila e executa testes de integracao em um SQLite temporario, cobrindo seed, senhas, cookies, CSRF, rotacao, expiracao, reinicio, logout, limite de tentativas e WebSocket. `yarn typecheck` valida os tipos.
+`yarn test` compila e executa testes de integracao em um SQLite temporario, cobrindo seed, cadastro, validacao, duplicidade e concorrencia, senhas, cookies, CSRF, rotacao, expiracao, reinicio, logout, limite de tentativas e WebSocket. `yarn typecheck` valida os tipos.
 
-Cadastro, recuperacao de senha, eventos e reservas ficam para as proximas etapas.
+Eventos e reservas ficam para as proximas etapas. Recuperacao de senha nao faz parte dos planos do projeto.

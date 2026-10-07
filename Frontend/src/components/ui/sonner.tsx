@@ -13,6 +13,7 @@ const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
     <Sonner
       theme="light"
       position="top-center"
+      swipeDirections={["right"]}
       className="toaster group"
       icons={{
         success: <img src="/MascoteSucesso.webp" alt="" className="size-full scale-125 object-contain" />,
@@ -28,7 +29,7 @@ const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
         style: { "--toast-duration": `${TOAST_DURATION_MS}ms`, ...toastOptions?.style } as React.CSSProperties,
         classNames: {
           toast:
-            "group/toast flex w-full items-center gap-4 overflow-hidden rounded-3xl border border-black/10 bg-white py-3.5 pr-6 pl-3.5 font-sans text-[#111111] shadow-[0_20px_45px_-18px_rgba(0,0,0,0.45)] after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:origin-left after:bg-[#ED1C24] after:[animation:toast-timer_var(--toast-duration)_linear_forwards] group-hover:after:[animation-play-state:paused] sm:w-[var(--width)]",
+            "group/toast flex w-full cursor-grab items-center gap-4 overflow-hidden rounded-3xl border border-black/10 bg-white py-3.5 pr-6 pl-3.5 font-sans text-[#111111] shadow-[0_20px_45px_-18px_rgba(0,0,0,0.45)] after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:origin-left after:bg-[#ED1C24] after:[animation:toast-timer_var(--toast-duration)_linear_forwards] group-hover:after:[animation-play-state:paused] active:cursor-grabbing sm:w-[var(--width)]",
           icon:
             "flex size-11 shrink-0 items-center justify-center rounded-full bg-[#111111] text-white [&_svg]:size-5 group-data-[type=error]/toast:size-14 group-data-[type=error]/toast:bg-transparent group-data-[type=info]/toast:size-14 group-data-[type=info]/toast:bg-transparent group-data-[type=success]/toast:size-14 group-data-[type=success]/toast:bg-transparent group-data-[type=warning]/toast:bg-amber-500",
           content: "flex min-w-0 flex-col gap-0.5",

@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { TicketAccessLink } from './TicketAccessLink'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowUpRight01Icon, Calendar03Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
@@ -6,7 +6,7 @@ import { matches } from './matches'
 
 export default function NextMatches() {
   return (
-    <section aria-labelledby="next-matches-title" className="mx-auto w-full max-w-7xl px-6 py-20 sm:px-12 lg:py-24">
+    <section id="proximos-jogos" tabIndex={-1} aria-labelledby="next-matches-title" className="mx-auto w-full max-w-7xl scroll-mt-6 px-6 py-20 outline-none sm:px-12 lg:py-24">
       <div className="flex items-center justify-center gap-4 sm:gap-8">
         <span aria-hidden="true" className="h-[3px] max-w-48 flex-1 rounded-full bg-gradient-to-r from-transparent to-[#ED1C24]" />
         <h2 id="next-matches-title" className="text-center text-3xl leading-none font-extrabold tracking-[-0.03em] uppercase sm:text-5xl lg:text-6xl">Próximos <span className="text-[#ED1C24]">jogos</span></h2>
@@ -26,7 +26,7 @@ export default function NextMatches() {
                 </div>
               </div>
               <Button asChild className="h-12 w-full gap-4 rounded-full bg-[#ED1C24] px-6 text-sm font-bold tracking-wide text-white uppercase shadow-lg shadow-[#ED1C24]/30 transition-transform duration-200 hover:scale-[1.02] hover:bg-[#d0161d] active:scale-100">
-                <Link to="/acesso">Comprar ingresso <HugeiconsIcon icon={ArrowUpRight01Icon} size={18} /></Link>
+                <TicketAccessLink>Comprar ingresso <HugeiconsIcon icon={ArrowUpRight01Icon} size={18} /></TicketAccessLink>
               </Button>
             </div>
           </li>

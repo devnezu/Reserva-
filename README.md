@@ -25,9 +25,9 @@ yarn install
 yarn dev
 ```
 
-Frontend: http://localhost:5173. A home apresenta o projeto e direciona a compra de ingressos para `/acesso`. A pagina de acesso alterna cadastro e login com Motion. O Hello World permanece em `/helloworld`.
+Frontend: http://localhost:5173. Na home, os links de ingressos levam visitantes para `/acesso`; usuarios autenticados permanecem na Home e rolam ate a secao de proximos jogos. A pagina de acesso alterna cadastro e login com Motion. Login e cadastro redirecionam para a Home. O Hello World permanece em `/helloworld`.
 
-A interface utiliza componentes shadcn/ui (`Button` e `Input`), Hugeicons e Tailwind v4. O login esta conectado ao backend, com restauracao de sessao ao recarregar, sincronizacao entre abas, logout e protecao de `/conta`. A tela de cadastro e a animacao de alternancia foram preservadas para integracao futura. Cadastro e compra de ingressos ainda nao estao conectados ao backend. A marca e Reservaí. A logo fornecida em `Frontend/public` foi vetorizada em `src/components/brand-mark.ts`, com acento agudo no i final.
+A interface utiliza componentes shadcn/ui (`Button` e `Input`), Hugeicons e Tailwind v4. Login e cadastro estao conectados ao backend, com restauracao de sessao ao recarregar, sincronizacao entre abas, logout e protecao de `/conta`. A animacao de alternancia foi preservada. Compra de ingressos ainda nao esta conectada ao backend. Recuperacao de senha nao faz parte dos planos do projeto. A marca e Reservaí. A logo fornecida em `Frontend/public` foi vetorizada em `src/components/brand-mark.ts`, com acento agudo no i final.
 
 O backend executa migrations e o seed dos usuarios Rafael (`dry1@reservai.com`) e Gustavo (`dry2@reservai.com`) ao iniciar em desenvolvimento. Tambem e possivel executar `yarn seed` na pasta Backend. Veja `Backend/README.md` para arquitetura, endpoints e configuracao de producao.
 
