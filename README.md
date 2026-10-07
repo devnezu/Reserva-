@@ -27,7 +27,11 @@ yarn dev
 
 Frontend: http://localhost:5173. A home apresenta o projeto e direciona a compra de ingressos para `/acesso`. A pagina de acesso alterna cadastro e login com Motion. O Hello World permanece em `/helloworld`.
 
-A interface utiliza componentes shadcn/ui (`Button` e `Input`), Hugeicons e Tailwind v4. Os formularios possuem validacao nativa, mas autenticacao, cadastro de usuarios e compra de ingressos ainda nao estao conectados ao backend. A marca e Reservai, com a logo fornecida em `Frontend/public`.
+A interface utiliza componentes shadcn/ui (`Button` e `Input`), Hugeicons e Tailwind v4. Os formularios possuem validacao nativa, mas autenticacao, cadastro de usuarios e compra de ingressos ainda nao estao conectados ao backend. A marca e Reservaí. A logo fornecida em `Frontend/public` foi vetorizada em `src/components/brand-mark.ts`, com acento agudo no i final.
+
+O preloader roda uma vez por carregamento do aplicativo, desenha a logo vetorizada em `src/components/brand-mark.ts`, preenche de baixo para cima e revela a pagina com ondas vermelhas. O percentual e uma animacao de progresso, nao uma medicao de bytes. Aguarda o evento `load` e as fontes, com limite de 15 segundos para recursos parados. A duracao minima normal e de aproximadamente 4,75 segundos; com movimento reduzido, os atrasos visuais sao dispensados. A navegacao entre rotas nao repete o preloader.
+
+Classes reutilizaveis: `animate-marquee`, `animate-mark-draw`, `animate-mark-ink`, `animate-mark-head`, `animate-result-in`, `animate-admin-drawer-in` e `scrollbar-brand`. As fontes Figtree e Plus Jakarta Sans e o tema existente foram mantidos.
 
 HTTP: http://127.0.0.1:3001/api/hello
 
