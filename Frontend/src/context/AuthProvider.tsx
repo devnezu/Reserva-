@@ -72,7 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const bootstrap = window.setTimeout(onFocus, 0)
     const onVisible = () => { if (document.visibilityState === 'visible') void refresh() }
     const onStorage = (event: StorageEvent) => { if (event.key === SYNC_KEY) void refresh() }
-    const onExpired = () => { generation.current++; setState(anonymous); syncTabs() }
+    // A delayed 401 may belong to a previous cookie/session. Check the current
+    // identity before clearing a successful newer login, including across tabs.
+    const onExpired = () => { void refresh() }
     const tabChannel = 'BroadcastChannel' in window ? new BroadcastChannel(SYNC_KEY) : null
     channel.current = tabChannel
     if (tabChannel) tabChannel.onmessage = onFocus

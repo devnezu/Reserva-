@@ -7,6 +7,7 @@ export class HttpError extends Error {
 export function errorHandler(error: unknown, response: ServerResponse) {
   if (response.headersSent) { response.end(); return }
   if (!(error instanceof HttpError)) console.error('Erro interno:', error)
+  if (error instanceof HttpError && error.status === 429) response.setHeader('Retry-After', '60')
   response.writeHead(error instanceof HttpError ? error.status : 500)
   response.end(JSON.stringify({
     message: error instanceof HttpError ? error.message : 'Não foi possível concluir a solicitação.',

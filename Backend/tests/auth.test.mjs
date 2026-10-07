@@ -131,17 +131,21 @@ test('SQLite authentication and session lifecycle', async (suite) => {
   })
 
   await suite.test('too many login attempts are limited', async () => {
-    db.prepare('DELETE FROM auth_attempts').run()
+    db.prepare('DELETE FROM auth_attempts').run(); db.prepare('DELETE FROM rate_buckets').run()
     for (let index = 0; index < 10; index++) assert.equal((await post('/api/auth/login', { email: 'limited@reservai.com', password: 'wrong' })).status, 401)
     assert.equal((await post('/api/auth/login', { email: 'limited@reservai.com', password: 'wrong' })).status, 429)
   })
 
   await suite.test('production cookies require HTTPS', async () => {
+    const created = await post('/api/auth/register', { name: 'Production Test', email: 'production@example.invalid', password: 'production-test123' })
+    assert.equal(created.status, 201)
     const production = await startServer({ NODE_ENV: 'production', SEED_ON_START: 'false' })
     try {
-      const response = await fetch(production.url + '/api/auth/login', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', 'X-Requested-With': 'Reservai' }, body: JSON.stringify({ email: 'dry2@reservai.com', password: 'dryedemais321' }) })
+      const response = await fetch(production.url + '/api/auth/login', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', 'X-Requested-With': 'Reservai' }, body: JSON.stringify({ email: 'production@example.invalid', password: 'production-test123' }) })
       assert.equal(response.status, 200)
       assert.match(response.headers.get('set-cookie'), /; Secure/)
+      const demo = await fetch(production.url + '/api/auth/login', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', 'X-Requested-With': 'Reservai' }, body: JSON.stringify({ email: 'dry2@reservai.com', password: 'dryedemais321' }) })
+      assert.equal(demo.status, 401)
     } finally { await stopServer(production) }
   })
 
@@ -194,7 +198,7 @@ test('SQLite authentication and session lifecycle', async (suite) => {
   })
 
   await suite.test('registration attempts are limited independently from login', async () => {
-    db.prepare('DELETE FROM auth_attempts').run()
+    db.prepare('DELETE FROM auth_attempts').run(); db.prepare('DELETE FROM rate_buckets').run()
     const body = { name: 'Duplicate', email: 'dry1@reservai.com', password: 'duplicate123' }
     for (let index = 0; index < 10; index++) assert.equal((await post('/api/auth/register', body)).status, 409)
     assert.equal((await post('/api/auth/register', body)).status, 429)

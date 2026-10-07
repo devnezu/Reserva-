@@ -5,6 +5,8 @@ import { requireAuth } from '../../middlewares/require-auth.js'
 import { requireTrustedRequest } from '../../middlewares/csrf.js'
 import { HttpError } from '../../middlewares/error-handler.js'
 import { reservationsRepository } from './repository.js'
+import { consumeRate } from '../../lib/resource-limits.js'
+import { clientAddress } from '../../lib/client-address.js'
 
 function key(value: string | string[] | undefined) {
   if (typeof value !== 'string' || !/^[a-zA-Z0-9_-]{16,128}$/.test(value)) throw new HttpError(400, 'Envie um identificador válido para esta tentativa.', 'INVALID_REQUEST_ID')
@@ -19,6 +21,11 @@ function pageNumber(value: string | null, fallback: number, maximum: number) {
 export async function reservationsRoutes(request: IncomingMessage, response: ServerResponse, pathname: string) {
   if (!/^\/api\/reservations(?:\/|$)/.test(pathname)) return false
   let user = requireAuth(request)
+  if (request.method === 'POST') {
+    requireTrustedRequest(request)
+    consumeRate(`reservation:ip:${clientAddress(request)}`, 300, 60000)
+    consumeRate(`reservation:${user.id}`, 60, 60000)
+  }
   if (pathname === '/api/reservations' && request.method === 'GET') {
     const params = new URL(request.url!, 'http://localhost').searchParams
     json(response, 200, reservationsRepository.list(user.id, pageNumber(params.get('page'), 1, 1000000), pageNumber(params.get('pageSize'), 6, 50)))
@@ -31,7 +38,7 @@ export async function reservationsRoutes(request: IncomingMessage, response: Ser
     if (!input || typeof input !== 'object' || !Number.isSafeInteger(input.eventId) || (input.eventId as number) < 1) throw new HttpError(400, 'Evento inválido.', 'INVALID_EVENT')
     if (typeof input.quantity !== 'number' || !Number.isInteger(input.quantity) || input.quantity < 1 || input.quantity > 4) throw new HttpError(400, 'Escolha uma quantidade inteira entre 1 e 4 ingressos.', 'INVALID_QUANTITY')
     user = requireAuth(request) // Recheck after asynchronous body reading.
-    const result = reservationsRepository.create(user.id, input.eventId as number, input.quantity, requestId)
+    const result = reservationsRepository.create(user.id, input.eventId as number, input.quantity, requestId, Date.now, () => { requireAuth(request) })
     json(response, result.status, result.body)
     return true
   }
@@ -41,7 +48,7 @@ export async function reservationsRoutes(request: IncomingMessage, response: Ser
   if (match[2] && request.method === 'POST') {
     requireTrustedRequest(request)
     const requestId = request.headers['x-request-id'] ? key(request.headers['x-request-id']) : randomUUID()
-    const result = reservationsRepository.transition(user.id, match[1], match[2] as 'confirm' | 'cancel', requestId)
+    const result = reservationsRepository.transition(user.id, match[1], match[2] as 'confirm' | 'cancel', requestId, Date.now, () => { requireAuth(request) })
     json(response, result.status, result.body)
     return true
   }

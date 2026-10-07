@@ -2,7 +2,6 @@ export const eventsMigration = {
   version: 3,
   sql: `
     ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'));
-    UPDATE users SET role = 'admin' WHERE email IN ('dry1@reservai.com', 'dry2@reservai.com');
     CREATE TABLE events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       seed_key TEXT UNIQUE,

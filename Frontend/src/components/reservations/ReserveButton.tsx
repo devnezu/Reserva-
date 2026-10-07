@@ -64,7 +64,9 @@ function ReserveAction({ event, quantity, open, onRefresh }: Props) {
       if (attempt.current?.key === current.key) complete(reservation)
     } catch (error) {
       if (attempt.current?.key !== current.key) return
-      if (error instanceof ApiError && error.status < 500) complete(undefined, error.message)
+      // Throttling does not tell us whether an earlier attempt committed. Keep
+      // its key so retrying a lost response never creates a second reservation.
+      if (error instanceof ApiError && error.status < 500 && ![408, 429].includes(error.status)) complete(undefined, error.message)
       else { setUncertain(true); notify.warning('Não recebemos a confirmação.', 'Tente novamente para verificar a mesma tentativa, sem duplicar a reserva.') }
     } finally { if (!attempt.current || attempt.current.key === current.key) { lock.current = false; setBusy(false) } }
   }

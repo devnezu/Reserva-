@@ -47,10 +47,10 @@ test('409 ao reservar: mostra a mensagem, encerra o carregamento e atualiza a di
   )
 
   expect(await screen.findByText('2 de 2 ingressos disponíveis')).toBeTruthy()
-  const reserve = await screen.findByRole('button', { name: 'Reservar ingressos' })
-  await waitFor(() => expect((reserve as HTMLButtonElement).disabled).toBe(false))
+  await screen.findByRole('button', { name: 'Reservar ingressos' })
+  await waitFor(() => expect((screen.getByRole('button', { name: 'Reservar ingressos' }) as HTMLButtonElement).disabled).toBe(false))
 
-  await user.click(reserve)
+  await user.click(screen.getByRole('button', { name: 'Reservar ingressos' }))
   const loading = await screen.findByRole('button', { name: 'Reservando…' })
   expect((loading as HTMLButtonElement).disabled).toBe(true)
   // Um segundo clique durante o envio não pode gerar outra requisição.

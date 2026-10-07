@@ -65,7 +65,7 @@ test('Authenticated profile photos and file lifecycle', async (suite) => {
 
   await suite.test('migration preserves accounts and upload requires authentication and trusted requests', async () => {
     assert.equal(db.prepare('SELECT password_hash FROM users WHERE id = 1').get().password_hash, passwordHash)
-    assert.deepEqual(db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((row) => row.version), [1, 2, 3, 4, 5, 6])
+    assert.deepEqual(db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((row) => row.version), [1, 2, 3, 4, 5, 6, 7, 8])
     assert.equal((await me(cookie)).user.avatarUrl, null)
     assert.equal((await upload(png)).status, 401)
     assert.equal((await upload(png, cookie, { Origin: 'https://untrusted.example' })).status, 403)
@@ -88,7 +88,7 @@ test('Authenticated profile photos and file lifecycle', async (suite) => {
     assert.equal(chunkedStatus, 413)
     assert.equal(operations().length, 0)
     assert.equal(db.prepare('SELECT COUNT(*) AS count FROM files').get().count, 0)
-    db.prepare('DELETE FROM auth_attempts WHERE key LIKE ?').run('avatar:%')
+    db.prepare("DELETE FROM rate_buckets WHERE key LIKE 'upload:%'").run()
   })
 
   await suite.test('stores a processed avatar and restores it after restart and login', async () => {
@@ -123,6 +123,7 @@ test('Authenticated profile photos and file lifecycle', async (suite) => {
     await waitFor(() => operations().some((row) => row.action === 'remove' && row.publicId === previous.public_id))
     assert.ok(db.prepare('SELECT * FROM file_cleanup_jobs WHERE public_id = ?').get(previous.public_id))
     controls({})
+    db.prepare('UPDATE file_cleanup_jobs SET next_attempt_at = 0').run()
     await stopServer(server)
     server = await startServer()
     await waitFor(() => db.prepare('SELECT COUNT(*) AS count FROM file_cleanup_jobs').get().count === 0)
@@ -146,7 +147,7 @@ test('Authenticated profile photos and file lifecycle', async (suite) => {
     const invalid = await upload('broken image', cookie, { 'Content-Type': 'image/jpeg' })
     assert.equal(invalid.status, 400)
     assert.equal((await invalid.json()).code, 'INVALID_IMAGE')
-    db.prepare('DELETE FROM auth_attempts WHERE key LIKE ?').run('avatar:%')
+    db.prepare("DELETE FROM rate_buckets WHERE key LIKE 'upload:%'").run()
   })
 
   await suite.test('provider failure keeps the current photo and hides provider details', async () => {
@@ -174,7 +175,7 @@ test('Authenticated profile photos and file lifecycle', async (suite) => {
   })
 
   await suite.test('upload rate limits and missing configuration return clear errors', async () => {
-    db.prepare('INSERT INTO auth_attempts (key, count, expires_at) VALUES (?, 10, ?) ON CONFLICT(key) DO UPDATE SET count = 10, expires_at = excluded.expires_at').run('avatar:1', Date.now() + 60000)
+    db.prepare('INSERT INTO rate_buckets (key, count, expires_at) VALUES (?, 10, ?) ON CONFLICT(key) DO UPDATE SET count = 10, expires_at = excluded.expires_at').run('upload:1', Date.now() + 60000)
     assert.equal((await upload(png, cookie)).status, 429)
     await stopServer(server)
     server = await startServer({ CLOUDINARY_CLOUD_NAME: '' })

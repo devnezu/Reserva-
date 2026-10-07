@@ -3,6 +3,8 @@ import { database } from '../../database/connection.js'
 import { inventory, notifyInventory } from '../events/inventory.js'
 import { enqueueNotification } from '../../realtime/outbox.js'
 import { HttpError } from '../../middlewares/error-handler.js'
+import { serverTime } from '../../lib/server-time.js'
+import { consumeRate } from '../../lib/resource-limits.js'
 
 export type ReservationStatus = 'PENDENTE' | 'CONFIRMADA' | 'CANCELADA' | 'EXPIRADA'
 interface ReservationRow {
@@ -37,7 +39,7 @@ function updated(row: ReservationRow, now: number) {
 
 // Must run inside an IMMEDIATE transaction. Batch expiry shares that transaction
 // with its notifications; no timer or client clock participates in correctness.
-function expire(now: number, filter: { userId?: number; eventId?: number; id?: string } = {}, limit = 1000) {
+export function expireReservations(now: number, filter: { userId?: number; eventId?: number; id?: string } = {}, limit = 1000) {
   const clauses = ["r.status = 'PENDENTE'", 'r.expires_at <= ?']
   const params: (number | string)[] = [now]
   if (filter.userId !== undefined) { clauses.push('r.user_id = ?'); params.push(filter.userId) }
@@ -57,6 +59,9 @@ function expire(now: number, filter: { userId?: number; eventId?: number; id?: s
 interface RequestRow { event_id: number; quantity: number; reservation_id: string | null; response_status: number; error_code: string | null; error_message: string | null }
 interface ResultBody { serverTime: number; requestId: string; reservation?: ReturnType<typeof reservationDto>; code?: string; message?: string }
 export interface ReservationResult { status: number; body: ResultBody }
+export function pruneReservationRequests(clock = Date.now) {
+  database.prepare('DELETE FROM reservation_requests WHERE reservation_id IS NULL AND created_at < ?').run(serverTime(clock) - 7 * 86400000)
+}
 function result(userId: number, requestId: string, now: number, status: number, reservation?: ReservationRow, code?: string, message?: string): ReservationResult {
   const body: ResultBody = { requestId, serverTime: now, ...(reservation ? { reservation: reservationDto(reservation, now) } : {}), ...(code ? { code, message } : {}) }
   enqueueNotification('reservation.result', { ...body, success: status < 400, httpStatus: status }, userId, now)
@@ -64,10 +69,11 @@ function result(userId: number, requestId: string, now: number, status: number, 
 }
 
 export const reservationsRepository = {
-  create(userId: number, eventId: number, quantity: number, requestId: string, clock = Date.now) {
+  create(userId: number, eventId: number, quantity: number, requestId: string, clock = Date.now, authorize = () => {}) {
     return run(() => {
-      const now = clock() // Capture time AFTER acquiring the write lock.
-      expire(now, { eventId })
+      authorize()
+      const now = serverTime(clock)
+      expireReservations(now, { eventId })
       const previous = database.prepare('SELECT * FROM reservation_requests WHERE user_id = ? AND request_key = ?').get(userId, requestId) as RequestRow | undefined
       if (previous) {
         if (previous.event_id !== eventId || previous.quantity !== quantity) return result(userId, requestId, now, 409, undefined, 'IDEMPOTENCY_CONFLICT', 'Esta tentativa já foi usada com outros dados.')
@@ -75,11 +81,16 @@ export const reservationsRepository = {
           ? result(userId, requestId, now, 200, find(previous.reservation_id, userId)!)
           : result(userId, requestId, now, previous.response_status, undefined, previous.error_code!, previous.error_message!)
       }
+      consumeRate(`reservation:intents:${userId}`, 1000, 86400000, () => now)
       const event = database.prepare('SELECT * FROM events WHERE id = ? AND published = 1 AND archived_at IS NULL').get(eventId) as { starts_at: number; expires_at: number; unit_price_cents: number } | undefined
       let code: string | undefined, message: string | undefined, status = 201
       if (!event) { status = 404; code = 'EVENT_NOT_FOUND'; message = 'Evento não encontrado.' }
       else if (event.starts_at <= now || event.expires_at <= now) { status = 409; code = 'EVENT_CLOSED'; message = 'O prazo para reservar este evento encerrou.' }
       else if (inventory(eventId, now)!.available < quantity) { status = 409; code = 'INSUFFICIENT_CAPACITY'; message = 'Não há ingressos suficientes para essa quantidade. Outra pessoa pode ter reservado os últimos ingressos.' }
+      else {
+        const pending = database.prepare("SELECT COUNT(*) AS total, COALESCE(SUM(CASE WHEN event_id = ? THEN 1 ELSE 0 END), 0) AS event_total FROM reservations WHERE user_id = ? AND status = 'PENDENTE' AND expires_at > ?").get(eventId, userId, now) as { total: number; event_total: number }
+        if (pending.total >= 10 || pending.event_total >= 4) { status = 409; code = 'PENDING_LIMIT'; message = 'Confirme ou cancele suas reservas pendentes antes de reservar novamente.' }
+      }
       let reservation: ReservationRow | undefined
       if (status === 201) {
         const id = randomUUID()
@@ -93,31 +104,33 @@ export const reservationsRepository = {
   },
   get(userId: number, id: string, clock = Date.now) {
     return run(() => {
-      const now = clock()
+      const now = serverTime(clock)
       if (!find(id, userId)) throw new HttpError(404, 'Reserva não encontrada.', 'RESERVATION_NOT_FOUND')
-      expire(now, { userId, id })
+      expireReservations(now, { userId, id })
       return { reservation: reservationDto(find(id, userId)!, now), serverTime: now }
     })
   },
   list(userId: number, page: number, pageSize: number, clock = Date.now) {
     return run(() => {
-      const now = clock()
-      expire(now, { userId })
+      const now = serverTime(clock)
+      expireReservations(now, { userId })
       const total = (database.prepare('SELECT COUNT(*) AS total FROM reservations WHERE user_id = ?').get(userId) as { total: number }).total
       const rows = database.prepare(`${select} WHERE r.user_id = ? ORDER BY r.created_at DESC, r.id DESC LIMIT ? OFFSET ?`).all(userId, pageSize, (page - 1) * pageSize) as ReservationRow[]
       return { items: rows.map((row) => reservationDto(row, now)), total, page, pageSize, totalPages: Math.ceil(total / pageSize), serverTime: now }
     })
   },
-  transition(userId: number, id: string, action: 'confirm' | 'cancel', requestId: string, clock = Date.now) {
+  transition(userId: number, id: string, action: 'confirm' | 'cancel', requestId: string, clock = Date.now, authorize = () => {}) {
     return run(() => {
-      const now = clock()
+      authorize()
+      const now = serverTime(clock)
       if (!find(id, userId)) return result(userId, requestId, now, 404, undefined, 'RESERVATION_NOT_FOUND', 'Reserva não encontrada.')
-      expire(now, { userId, id })
+      expireReservations(now, { userId, id })
       const row = find(id, userId)!
       if (action === 'confirm' && row.status === 'CONFIRMADA') return result(userId, requestId, now, 200, row)
       if (row.status !== 'PENDENTE') return result(userId, requestId, now, 409, undefined,
         row.status === 'EXPIRADA' ? 'RESERVATION_EXPIRED' : 'INVALID_TRANSITION',
         row.status === 'EXPIRADA' ? 'Sua reserva expirou. Faça uma nova reserva se ainda houver ingressos.' : 'Esta reserva já foi finalizada e não permite essa ação.')
+      if (action === 'confirm' && inventory(row.event_id, now)!.available < 0) return result(userId, requestId, now, 409, undefined, 'INVENTORY_CONFLICT', 'A disponibilidade mudou. Não foi possível confirmar esta reserva.')
       const status = action === 'confirm' ? 'CONFIRMADA' : 'CANCELADA'
       database.prepare(`UPDATE reservations SET status = ?, updated_at = ?, ${action === 'confirm' ? 'confirmed_at' : 'cancelled_at'} = ?, version = version + 1 WHERE id = ? AND status = 'PENDENTE' AND expires_at > ?`).run(status, now, now, id, now)
       const changed = find(id, userId)!
@@ -127,7 +140,7 @@ export const reservationsRepository = {
     })
   },
   expireDue(clock = Date.now) {
-    if (!database.prepare("SELECT 1 FROM reservations WHERE status = 'PENDENTE' AND expires_at <= ? LIMIT 1").get(clock())) return 0
-    return run(() => expire(clock()))
+    if (!database.prepare("SELECT 1 FROM reservations WHERE status = 'PENDENTE' AND expires_at <= ? LIMIT 1").get(serverTime(clock))) return 0
+    return run(() => expireReservations(serverTime(clock)))
   },
 }

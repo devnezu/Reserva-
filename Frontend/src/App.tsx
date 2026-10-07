@@ -3,7 +3,6 @@ import { useCallback, useState } from 'react'
 import { Preloader } from '@/components/preloader'
 import { PageTransition } from '@/components/page-transition'
 import { Toaster } from '@/components/ui/sonner'
-import HelloWorld from './pages/HelloWorld'
 import Home from './pages/Home'
 import Access from './pages/Access'
 import Account from './pages/Account'
@@ -25,7 +24,6 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/acesso" element={<Access />} />
           <Route path="/eventos/:id" element={<Event />} />
-          <Route path="/helloworld" element={<HelloWorld />} />
           <Route element={<RequireAuth />}>
             <Route path="/conta" element={<Account />} />
             <Route path="/reservas/:id" element={<Reservation />} />

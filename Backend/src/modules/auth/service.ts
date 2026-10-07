@@ -4,6 +4,7 @@ import { config } from '../../config/env.js'
 import { HttpError } from '../../middlewares/error-handler.js'
 import { authRepository } from './repository.js'
 import { getDummyHash, hashPassword, verifyPassword } from './password.js'
+import { loginFailed, loginSucceeded } from '../../middlewares/login-rate-limit.js'
 
 export const authEvents = new EventEmitter()
 export const tokenHash = (token: string) => createHash('sha256').update(token).digest('hex')
@@ -16,14 +17,18 @@ export function revokeToken(token?: string) {
   authEvents.emit('revoked', hash)
 }
 
-export async function login(email: string, password: string, previousToken?: string) {
+export async function login(email: string, password: string, previousToken?: string, address = 'internal') {
   if (verifying >= 4) throw new HttpError(503, 'Acesso ocupado. Tente novamente em instantes.')
   verifying++
   let user
   try {
     user = authRepository.findUser(email)
     const valid = await verifyPassword(user?.password_hash ?? await getDummyHash(), password)
-    if (!valid || !user) throw new HttpError(401, 'E-mail ou senha incorretos.', 'INVALID_CREDENTIALS')
+    if (!valid || !user || (config.production && user.demo_account) || (user.role === 'admin' && !authRepository.hasAdminGrant(user.id))) {
+      loginFailed(address, email)
+      throw new HttpError(401, 'E-mail ou senha incorretos.', 'INVALID_CREDENTIALS')
+    }
+    loginSucceeded(address, email)
   } finally { verifying-- }
   const token = randomBytes(32).toString('hex')
   const expiresAt = Date.now() + config.sessionDurationMs

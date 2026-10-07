@@ -17,6 +17,8 @@ const user = database.prepare("SELECT id FROM users WHERE email = 'dry1@reservai
 
 test('Server clock boundaries and expiry without a worker', async (suite) => {
   suite.after(() => database.close())
+  // Independent clock scenarios; production never resets this high-water mark.
+  suite.beforeEach(() => database.prepare('UPDATE security_clock SET observed_at = 0').run())
   const now = Date.now()
   const make = (time = now) => reservations.create(user, event, 1, randomUUID(), () => time).body.reservation
   await suite.test('expires exactly at 5 minutes, not a millisecond later; conflicts persist EXPIRADA', () => {

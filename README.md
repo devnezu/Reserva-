@@ -1,74 +1,176 @@
-# Projeto
+# Reservaí
 
-Reservaí: interface de ingressos com autenticacao por e-mail e senha, sessoes persistentes e reservas com confirmacao simulada.
+Aplicação de reserva de ingressos: o usuário consulta eventos, reserva de 1 a 4 ingressos por 5 minutos e confirma uma compra simulada. Quando duas pessoas disputam os últimos ingressos, o servidor respeita a capacidade do evento e informa quem conseguiu.
 
-- Frontend: React, TypeScript, Vite, Tailwind CSS v4 e Hugeicons Free.
-- Backend: TypeScript, HTTP nativo do Node, WebSocket (`ws`) e SQLite (`better-sqlite3`).
+Projeto desenvolvido como desafio técnico de React + Node.js.
 
-## Executar
+- [Decisões e limites](DECISOES.md): estrutura, autenticação, concorrência, expiração, o que funciona e o que ficou de fora.
+- [Contrato da API](docs/API.md): rotas, exemplos de requisição e resposta, códigos de erro.
+- [Uso de IA](AI_USAGE.md): ferramentas, exemplos de interação e tempo de trabalho.
 
-Yarn 1.22.22 instalado e ativado via Corepack. Cada pasta tem seu proprio `package.json`, `yarn.lock` e dependencias.
+## Stack e versões
 
-Em um terminal, na raiz:
+| Parte | Tecnologia |
+|---|---|
+| Frontend | React 19, TypeScript 6, Vite 8, Tailwind CSS 4, React Router 7 |
+| Backend | Node.js com o módulo HTTP nativo (sem framework), TypeScript 7 |
+| Banco | SQLite, pelo driver `better-sqlite3` 12.8 (SQL direto, sem ORM) |
+| Senhas | Argon2id (`argon2` 0.44) |
+| Testes | `node:test` no backend; Vitest 4 e Testing Library no frontend |
+
+As versões exatas de todas as dependências estão nos arquivos `yarn.lock` de cada pasta.
+
+## Pré-requisitos
+
+- **Node.js 20** (verificado com 20.20.2).
+- **Yarn 1.22** (`npm install -g yarn`, ou `corepack enable`).
+
+Não é preciso instalar banco de dados: o SQLite é um arquivo criado pelo próprio backend.
+
+## Instalação
+
+O repositório tem dois projetos independentes, cada um com seu `package.json` e `yarn.lock`.
 
 ```sh
 cd Backend
 yarn install
-yarn dev
+
+cd ../Frontend
+yarn install
 ```
 
-Em outro terminal, na raiz:
+## Configuração do ambiente
+
+O backend roda sem nenhuma configuração. Para personalizar, copie o exemplo:
+
+```sh
+cd Backend
+cp .env.example .env
+```
+
+| Variável | Padrão | Para que serve |
+|---|---|---|
+| `PORT` | `3001` | Porta do backend |
+| `DATABASE_PATH` | `./data/app.sqlite` | Arquivo do banco |
+| `APP_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Origens autorizadas a chamar a API |
+| `SEED_ON_START` | `true` fora de produção | Roda o seed ao iniciar |
+| `CLOUDINARY_*` | vazio | Opcional. Só para o envio de foto de perfil e de banner |
+
+O frontend não tem variáveis de ambiente: em desenvolvimento, o Vite encaminha `/api` e `/ws` para `http://127.0.0.1:3001`.
+
+Deploy não faz parte do escopo. Se for publicar: use HTTPS, defina `NODE_ENV=production` (o cookie passa a ser `Secure` e o seed automático é desligado), configure `APP_ORIGINS` com a origem real do frontend e sirva `/api` e `/ws` pela mesma origem dele. O servidor escuta em `127.0.0.1`; ajuste `HOST` se precisar.
+
+## Banco, migrations e seed
+
+- **Migrations:** ficam em `Backend/src/database/migrations` e são aplicadas automaticamente, em ordem e uma única vez, sempre que o backend inicia. A tabela `schema_migrations` registra as já aplicadas.
+- **Seed:** roda ao iniciar em desenvolvimento e também pelo comando abaixo. Pode ser executado quantas vezes for preciso sem duplicar nem sobrescrever registros.
+
+```sh
+cd Backend
+yarn seed
+```
+
+O seed cria dois usuários e três eventos futuros:
+
+| Evento | Início | Preço | Capacidade |
+|---|---|---|---|
+| São Paulo FC x EC Vitória | em 3 dias | R$ 34,50 | 500 |
+| São Paulo FC x Vasco da Gama | em 10 dias | R$ 20,00 | 300 |
+| Noite Pop — Últimos 2 ingressos | em 17 dias | R$ 10,00 | 2 |
+
+Para recomeçar do zero, pare o backend e apague os arquivos `Backend/data/app.sqlite*`.
+
+## Contas de demonstração
+
+| Nome | E-mail | Senha | Papel |
+|---|---|---|---|
+| Rafael | `dry1@reservai.com` | `dryedemais123` | usuário |
+| Gustavo | `dry2@reservai.com` | `dryedemais321` | administrador |
+
+São dados fictícios, criados pelo seed.
+
+## Execução
+
+Em dois terminais:
+
+```sh
+cd Backend
+yarn dev
+```
 
 ```sh
 cd Frontend
-yarn install
 yarn dev
 ```
 
-Frontend: http://localhost:5173. A pagina de acesso alterna cadastro e login com Motion. Login e cadastro redirecionam para a Home. O Hello World permanece em `/helloworld`. Os cards e o destaque da home abrem a pagina dinamica do evento. Visitantes podem consultar as informacoes; o botao de compra leva ao login quando necessario.
+- Aplicação: http://localhost:5173
+- API: http://127.0.0.1:3001
 
-A interface utiliza componentes shadcn/ui (`Button` e `Input`), Hugeicons e Tailwind v4. Login e cadastro estao conectados ao backend, com restauracao de sessao ao recarregar, sincronizacao entre abas, logout e protecao de `/conta` e `/reservas/:id`. A animacao de alternancia foi preservada. Reservas e compra simulada estao conectadas ao backend. Recuperacao de senha nao faz parte dos planos do projeto. A marca e Reservaí. A logo fornecida em `Frontend/public` foi vetorizada em `src/components/brand-mark.ts`, com acento agudo no i final.
+Para a disputa pelos últimos ingressos, entre com as duas contas em navegadores diferentes (ou em uma janela anônima) e reserve 2 ingressos da "Noite Pop" nas duas: uma reserva é criada e a outra recebe o aviso de que não há ingressos suficientes.
 
-O backend executa migrations e o seed dos usuarios Rafael (`dry1@reservai.com`, papel `user`) e Gustavo (`dry2@reservai.com`, papel `admin`) ao iniciar em desenvolvimento. Tambem cria tres eventos futuros, um deles com capacidade de apenas 2 ingressos. O seed nao sobrescreve contas ou eventos existentes. Tambem e possivel executar `yarn seed` na pasta Backend. Veja `Backend/README.md` para arquitetura, endpoints e configuracao de producao.
+## Testes
 
-Os proximos jogos da home usam o catalogo SQLite, com busca por titulo, filtro de categoria e paginacao no servidor. Precos ficam em centavos inteiros (R$ 34,50 = 3450); cada card exibe banner, titulo, local, data, preco, disponibilidade e prazo de reserva. O SVG do Brasileirao aparece somente em Futebol. Gustavo pode acessar `/admin/eventos` pelo menu ou pela conta e cadastrar/editar/arquivar eventos, com banner no Cloudinary de ate 25 MB. O campo Conteudo aceita Markdown, possui previa no formulario e aparece somente na pagina do evento.
+```sh
+cd Backend
+yarn test
+```
 
-Paginas como `/eventos/spfc-vitoria` consultam os valores atuais no banco, mantendo as imagens originais. A migration 005 e o seed levam os textos antes fixos (descricao e Antes de ir) para o SQLite, preservando edicoes existentes. Os slugs sao unicos e estaveis ao editar titulos. O total de ingressos e calculado em centavos e a selecao respeita a disponibilidade; eventos encerrados e esgotados exibem a reserva desabilitada.
+Compila o backend e roda 55 testes de integração em bancos SQLite temporários, sem tocar no banco de desenvolvimento.
 
-A migration 006 adiciona reservas, idempotencia e notificacoes persistentes. O usuario pode reservar de 1 a 4 ingressos por 5 minutos, confirmar uma compra simulada ou cancelar. `/reservas/:id` mostra o resumo e a contagem regressiva; `/conta?secao=eventos` lista Minhas reservas. O SQLite valida a disponibilidade e cria a reserva na mesma transacao, protegendo a disputa pelos ultimos ingressos. Confirmacao repetida nao duplica a ocupacao; cancelamento e expiracao liberam capacidade. HTTP e WS retornam resultados individuais e atualizacoes de disponibilidade, com recuperacao apos desconexao. Veja [o contrato e o roteiro de teste](Backend/docs/reservations.md).
+```sh
+cd Frontend
+yarn test
+```
 
-Na tela `/conta`, o usuario pode adicionar ou trocar sua foto de perfil (JPG, PNG ou WebP de ate 25 MB). O backend prepara a imagem e envia ao Cloudinary, mantendo o vinculo e os metadados no SQLite. O avatar e restaurado ao entrar e sincronizado entre abas. As credenciais do Cloudinary ficam apenas no `.env` do Backend; veja `Backend/.env.example`.
+Roda o teste de interface do conflito ao reservar.
 
-O preloader roda uma vez por carregamento do aplicativo, desenha a logo vetorizada em `src/components/brand-mark.ts`, preenche de baixo para cima e revela a pagina com ondas vermelhas. O percentual e uma animacao de progresso, nao uma medicao de bytes. Aguarda o evento `load` e as fontes, com limite de 15 segundos para recursos parados. A duracao minima normal e de aproximadamente 4,75 segundos; com movimento reduzido, os atrasos visuais sao dispensados. A navegacao entre rotas nao repete o preloader.
+Onde está cada cenário obrigatório:
 
-Classes reutilizaveis: `animate-marquee`, `animate-mark-draw`, `animate-mark-ink`, `animate-mark-head`, `animate-result-in`, `animate-admin-drawer-in` e `scrollbar-brand`. As fontes Figtree e Plus Jakarta Sans e o tema existente foram mantidos.
+| Cenário | Arquivo |
+|---|---|
+| 1. Fluxo e repetição da confirmação | `Backend/tests/reservations.test.mjs` |
+| 2. Concorrência com capacidade 2 | `Backend/tests/reservations.test.mjs` |
+| 3. Expiração no limite exato e depois | `Backend/tests/reservation-boundaries.test.mjs` |
+| 4. Cancelamento | `Backend/tests/reservations.test.mjs` |
+| 5. Acesso e propriedade | `Backend/tests/reservations.test.mjs` e `Backend/tests/auth.test.mjs` |
+| 6. Interface diante de um 409 | `Frontend/src/pages/Event.conflict.test.tsx` |
 
-HTTP: http://127.0.0.1:3001/api/hello
+Outras verificações: `yarn typecheck` no backend; `yarn lint` e `yarn build` no frontend.
 
-WebSocket: ws://127.0.0.1:3001/ws
-
-O Vite encaminha `/api` e `/ws` ao backend durante o desenvolvimento. Os clientes iniciais ficam em `Frontend/src/api/index.ts`.
+## Estrutura
 
 ```text
 Backend/
-  data/
   src/
-    database.ts
-    server.ts
+    server.ts            inicialização: migrations, seed, servidor HTTP e WebSocket
+    app.ts               roteamento e tratamento de erros
+    config/              variáveis de ambiente
+    database/            conexão, migrations e seed
+    middlewares/         autenticação, administrador, origem, erros, limite de tentativas
+    modules/
+      auth/              login, cadastro, sessão e senhas
+      events/            catálogo, administração e cálculo de disponibilidade
+      reservations/      criação, consulta, confirmação, cancelamento e expiração
+      files/             envio de imagens
+    realtime/            notificações por WebSocket
+  tests/                 testes de integração
 Frontend/
   src/
-    App.tsx
-    main.tsx
-    hooks/
-    context/
-    api/
-    i18n/
+    pages/               home, acesso, evento, conta, reserva, administração, 404
+    components/          interface, organizada por área
+    api/                 chamadas HTTP
+    context/ e hooks/    sessão, tempo real e carregamento de dados
+docs/API.md              contrato da API
 ```
 
-`hooks` e `context` gerenciam a autenticacao e a sessao do frontend. `i18n` fica reservado para o desenvolvimento futuro; nenhuma biblioteca de tradução foi adicionada.
+## Telas
 
-O SQLite cria `Backend/data/app.sqlite` na primeira execução, com tabelas de usuarios, sessoes, limites de tentativas e controle de migrations. Para personalizar o backend, copie `Backend/.env.example` para `Backend/.env`. O `.env` existente na raiz foi preservado e não é carregado automaticamente.
-
-Execute `yarn build` dentro de cada pasta para compilar. Use `yarn lint` no Frontend e `yarn typecheck` no Backend para verificar o codigo. Apos compilar o Backend, `yarn start` inicia seu servidor. O deploy do frontend e o proxy de producao ainda devem ser definidos.
-
-Node verificado: 20.20.2. O índice oficial consultado indicou 26.10.0 como Current e 24.21.0 como LTS. O ambiente instalado foi mantido. O driver `better-sqlite3` esta fixado em 12.8.0, com SQLite 3.51.3 e binario Windows compativel com esse Node. Essa versao inclui a correcao da falha WAL-reset em concorrencia entre conexoes.
+| Endereço | Tela | Exige login |
+|---|---|---|
+| `/` | Home com o catálogo, busca e categorias | não |
+| `/acesso` | Login e cadastro | não |
+| `/eventos/:slug` | Detalhe do evento e reserva | não para ver; sim para reservar |
+| `/reservas/:id` | Reserva: contagem regressiva, confirmar, cancelar | sim |
+| `/conta` | Meus dados | sim |
+| `/conta?secao=eventos` | Minhas reservas | sim |
+| `/admin/eventos` | Gerenciamento de eventos | administrador |

@@ -3,6 +3,7 @@ import { json, readJson } from '../../lib/http.js'
 import { requireAuth } from '../../middlewares/require-auth.js'
 import { requireTrustedRequest } from '../../middlewares/csrf.js'
 import { limitLogin } from '../../middlewares/login-rate-limit.js'
+import { clientAddress } from '../../lib/client-address.js'
 import { clearSessionCookie, getToken, setSessionCookie } from './cookies.js'
 import { parseLogin, parseRegister } from './schemas.js'
 import { login, register, revokeToken } from './service.js'
@@ -11,7 +12,7 @@ export const authController = {
   async register(request: IncomingMessage, response: ServerResponse) {
     requireTrustedRequest(request)
     const body = parseRegister(await readJson(request))
-    limitLogin(request.socket.remoteAddress ?? 'unknown', body.email, 'register')
+    limitLogin(clientAddress(request), body.email, 'register')
     const session = await register(body.name, body.email, body.password, getToken(request))
     setSessionCookie(response, session.token, session.expiresAt)
     json(response, 201, { user: session.user, expiresAt: session.expiresAt })
@@ -19,8 +20,9 @@ export const authController = {
   async login(request: IncomingMessage, response: ServerResponse) {
     requireTrustedRequest(request)
     const body = parseLogin(await readJson(request))
-    limitLogin(request.socket.remoteAddress ?? 'unknown', body.email)
-    const session = await login(body.email, body.password, getToken(request))
+    const address = clientAddress(request)
+    limitLogin(address, body.email)
+    const session = await login(body.email, body.password, getToken(request), address)
     setSessionCookie(response, session.token, session.expiresAt)
     json(response, 200, { user: session.user, expiresAt: session.expiresAt })
   },
