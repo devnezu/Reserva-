@@ -8,6 +8,7 @@ import { useServerCountdown } from '@/hooks/use-server-countdown'
 import { formatEventDate, formatPrice } from '@/lib/events'
 import { notify } from '@/lib/notify'
 import { Button } from '@/components/ui/button'
+import { ReservationCode } from './ReservationCode'
 
 const LABEL_CLASS = 'text-[11px] font-bold tracking-[0.14em] text-neutral-600 uppercase'
 const STATES = {
@@ -96,11 +97,12 @@ export function ReservationCard({ reservation: incoming, serverTime: incomingTim
           </div>
           {pending
             ? <div className="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
-                <Button disabled={!!busy || countdown.remaining === 0} onClick={() => { void action('confirm') }} className="h-12 rounded-full bg-[#ED1C24] px-7 text-sm font-bold tracking-wide text-white uppercase shadow-lg shadow-[#ED1C24]/30 hover:bg-[#d0161d]">{busy === 'confirm' ? 'Confirmando…' : 'Confirmar compra simulada'}</Button>
+                <Button disabled={!!busy || countdown.remaining === 0} onClick={() => { void action('confirm') }} className="h-12 rounded-full bg-[#ED1C24] px-7 text-sm font-bold tracking-wide text-white uppercase shadow-lg shadow-[#ED1C24]/30 hover:bg-[#d0161d]">{busy === 'confirm' ? 'Confirmando…' : 'Pagar compra simulada'}</Button>
                 <Button disabled={!!busy || countdown.remaining === 0} onClick={() => { void action('cancel') }} variant="outline" className="h-12 rounded-full border-black/15 bg-transparent px-7 text-sm font-bold tracking-wide uppercase shadow-none">{busy === 'cancel' ? 'Cancelando…' : 'Cancelar reserva'}</Button>
               </div>
             : <Button asChild variant="outline" className="h-12 shrink-0 rounded-full border-black/15 bg-transparent px-7 text-sm font-bold tracking-wide uppercase shadow-none"><Link to={`/eventos/${reservation.event.slug}`}>Ver evento</Link></Button>}
         </div>
+        {reservation.status === 'CONFIRMADA' && <ReservationCode key={reservation.id} code={reservation.id} />}
       </div>
     </article>
   )

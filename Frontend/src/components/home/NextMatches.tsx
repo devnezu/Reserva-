@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { useEvents } from '@/hooks/use-events'
 import { EventCard } from '@/components/events/EventCard'
 import { EventFilters, EventPagination } from '@/components/events/EventFilters'
+import { LoadingOverlay } from '@/components/LoadingOverlay'
 
 export default function NextMatches() {
   const [query, setQuery] = useState({ q: '', genre: '', page: 1 })
@@ -16,7 +17,7 @@ export default function NextMatches() {
       </div>
 
       <div className="mt-10"><EventFilters search={query.q} genre={query.genre} onSearch={(q) => setQuery({ ...query, q, page: 1 })} onGenre={(genre) => setQuery({ ...query, genre, page: 1 })} /></div>
-      {loading && !data && <p role="status" className="py-12 text-center text-neutral-600">Carregando eventos…</p>}
+      {loading && !data && <LoadingOverlay label="Carregando eventos" />}
       {error && <div role="alert" className="py-12 text-center"><p>{error}</p><Button onClick={refresh} className="mt-4">Tentar novamente</Button></div>}
       {data && !error && <>{data.items.length ? <ul aria-busy={loading} className="mt-8 grid gap-8 lg:grid-cols-2">{data.items.map((event) => <li key={event.id}><EventCard event={event} /></li>)}</ul> : <p className="py-12 text-center text-neutral-600">Nenhum evento disponível para esses filtros.</p>}<EventPagination page={query.page} pages={data.totalPages} busy={loading} onPage={(page) => setQuery({ ...query, page })} /></>}
     </section>

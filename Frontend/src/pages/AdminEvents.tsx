@@ -11,6 +11,7 @@ import { useEvents } from '@/hooks/use-events'
 import { EVENT_STATUS, formatEventDate, formatPrice } from '@/lib/events'
 import { notify } from '@/lib/notify'
 import { cn } from '@/lib/utils'
+import { LoadingOverlay } from '@/components/LoadingOverlay'
 
 const LIST_PATH = '/admin/eventos'
 const NEW_PATH = `${LIST_PATH}/novo`
@@ -54,7 +55,7 @@ export default function AdminEvents() {
       <AccountLayout active="admin" trail={creating ? 'Novo evento' : 'Editar evento'} title={<>{creating ? 'Novo' : 'Editar'} <span className="text-[#ED1C24]">evento</span></>}>
         {creating && <EventForm key="new" onSaved={refresh} onCancel={backToList} />}
         {!creating && current?.event && <EventForm key={current.event.id} event={current.event} onSaved={refresh} onCancel={backToList} />}
-        {!creating && !failure && !current?.event && <p role="status" className="py-8 text-center text-neutral-600">Carregando evento…</p>}
+        {!creating && !failure && !current?.event && <LoadingOverlay label="Carregando evento" />}
         {failure && <div role="alert" className="bg-[#f0eceb] px-6 py-12 text-center"><p className="text-sm font-bold uppercase">{failure}</p><Button asChild className="mt-5 h-12 rounded-full bg-[#ED1C24] px-7 text-sm font-bold tracking-wide text-white uppercase hover:bg-[#d0161d]"><Link to={LIST_PATH}>Voltar para eventos</Link></Button></div>}
       </AccountLayout>
     )
@@ -63,7 +64,7 @@ export default function AdminEvents() {
   return (
     <AccountLayout active="admin" title={<>Eventos <span className="text-[#ED1C24]">cadastrados</span></>} action={<Button asChild className="h-12 gap-3 rounded-full bg-[#ED1C24] px-7 text-sm font-bold tracking-wide text-white uppercase shadow-lg shadow-[#ED1C24]/30 hover:bg-[#d0161d]"><Link to={NEW_PATH}><HugeiconsIcon icon={Add01Icon} size={18} />Novo evento</Link></Button>}>
       <EventFilters categories="select" search={query.q} genre={query.genre} onSearch={(q) => setQuery({ ...query, q, page: 1 })} onGenre={(genre) => setQuery({ ...query, genre, page: 1 })} />
-      {loading && !data && <p role="status" className="py-8 text-center text-neutral-600">Carregando eventos…</p>}
+      {loading && !data && <LoadingOverlay label="Carregando eventos" />}
       {error && <div role="alert" className="py-8 text-center"><p>{error}</p><Button className="mt-4 rounded-full" onClick={refresh}>Tentar novamente</Button></div>}
       {data && <>
         <ul className="space-y-4">{data.items.map((event) => <li key={event.id} className="flex flex-col gap-5 overflow-hidden rounded-3xl border border-black/10 bg-white p-5 md:flex-row md:items-center">
