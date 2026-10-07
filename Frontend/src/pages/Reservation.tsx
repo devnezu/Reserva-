@@ -10,8 +10,8 @@ export default function Reservation() {
   const { data, error, loading, notFound, refresh } = useReservation(id)
   return <AccountLayout active="eventos" trail="Sua reserva" title={<>Sua <span className="text-[#ED1C24]">reserva</span></>}>
     <RealtimeStatus />
-    {loading && <p role="status">Carregando reserva…</p>}
-    {error && <div role="alert" className="rounded-2xl border border-red-200 bg-white p-6"><p>{notFound ? 'Reserva não encontrada.' : error}</p>{!notFound && <Button onClick={refresh} variant="outline" className="mt-3">Tentar novamente</Button>}</div>}
+    {loading && !data && <p role="status" className="py-8 text-center text-neutral-600">Carregando reserva…</p>}
+    {error && <div role="alert" className="bg-[#f0eceb] px-6 py-12 text-center"><p className="text-sm font-bold uppercase">{notFound ? 'Reserva não encontrada.' : error}</p>{!notFound && <Button onClick={refresh} className="mt-5 h-12 rounded-full bg-[#ED1C24] px-7 text-sm font-bold tracking-wide text-white uppercase hover:bg-[#d0161d]">Tentar novamente</Button>}</div>}
     {data && <ReservationCard reservation={data.reservation} serverTime={data.serverTime} onRefresh={refresh} detail />}
   </AccountLayout>
 }
