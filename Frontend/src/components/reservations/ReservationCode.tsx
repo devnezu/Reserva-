@@ -53,8 +53,8 @@ export function ReservationCode({ code }: { code: string }) {
       <Button type="button" disabled={copyState === 'copying'} onClick={() => { void copy() }} variant="outline" className="h-11 max-w-full rounded-full border-black/15 bg-white px-5 text-xs font-bold tracking-wide uppercase shadow-none">
         {copyState === 'copying' ? 'Copiando…' : copyState === 'copied' ? 'Código copiado!' : 'Copiar código da reserva'}
       </Button>
-      <p role="status" aria-live="polite" className="text-xs text-neutral-600">
-        {copyState === 'copied' ? 'Código copiado para a área de transferência.' : copyState === 'manual' ? 'Não foi possível copiar automaticamente. O código foi selecionado para você copiar manualmente.' : 'O código permanece disponível abaixo do QR Code.'}
+      <p role="status" aria-live="polite" className={copyState === 'manual' ? 'text-xs text-neutral-600' : 'sr-only'}>
+        {copyState === 'copied' ? 'Código copiado para a área de transferência.' : copyState === 'manual' ? 'Não foi possível copiar automaticamente. O código foi selecionado para você copiar manualmente.' : ''}
       </p>
     </section>
   )
