@@ -14,7 +14,7 @@ export default function Experience() {
       <motion.div aria-hidden="true" initial={reducedMotion ? false : { opacity: 0, rotate: 0, y: 30 }} whileInView={{ opacity: 1, rotate: -7, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, delay: 0.15 }} className="relative mx-auto w-full max-w-[360px]">
         <div className="absolute inset-0 translate-x-4 translate-y-4 rotate-[12deg] rounded-3xl border border-neutral-300 bg-[#ece7e4]" />
         <div className="relative overflow-hidden rounded-3xl bg-black p-8 text-white shadow-2xl shadow-black/15">
-          <div className="flex items-center justify-between text-[9px] font-medium tracking-[0.18em]"><span>RESERVAI / ADMIT ONE</span><HugeiconsIcon icon={Ticket01Icon} size={25} /></div>
+          <div className="flex items-center justify-between text-[9px] font-medium tracking-[0.18em]"><span>RESERVAÍ / ADMIT ONE</span><HugeiconsIcon icon={Ticket01Icon} size={25} /></div>
           <p className="mt-16 text-[11px] tracking-[0.24em] text-white/50">SEU LUGAR É AQUI.</p>
           <p className="mt-3 text-5xl leading-none font-medium tracking-[-0.05em]">Viva o<br />inesquecível.</p>
           <div className="relative -mx-8 mt-12 border-t border-dashed border-white/30"><span className="absolute -left-3 -top-3 h-6 w-6 rounded-full bg-[#faf8f7]" /><span className="absolute -right-3 -top-3 h-6 w-6 rounded-full bg-[#faf8f7]" /></div>

@@ -115,3 +115,12 @@
   &::-webkit-scrollbar-thumb { border-radius: 9999px; background-color: #ED1C24; }
   &::-webkit-scrollbar-thumb:hover { background-color: #b9141c; }
 }
+
+@layer base {
+  html { @apply font-sans; }
+  body { @apply bg-background text-foreground; }
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+}

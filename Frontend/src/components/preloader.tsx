@@ -8,14 +8,6 @@ import {
 } from '@/components/brand-mark'
 import { cn } from '@/lib/utils'
 
-const LOADING_TIPS = [
-  'Preparando sua próxima experiência...',
-  'Abrindo os portões para novos momentos...',
-  'A torcida já está aquecendo...',
-  'Seu lugar na arquibancada começa aqui...',
-  'Quase lá...',
-]
-
 const MIN_VISIBLE_MS = 2000
 const COMPLETE_MS = 900
 const HOLD_AT_100_MS = 350
@@ -27,7 +19,6 @@ type Phase = 'loading' | 'ready' | 'exiting' | 'done'
 export function Preloader({ onComplete }: { onComplete?: () => void }) {
   const [progress, setProgress] = useState(0)
   const [phase, setPhase] = useState<Phase>('loading')
-  const [tipIndex, setTipIndex] = useState(0)
   const progressRef = useRef(0)
   const clipId = useId().replace(/[^a-zA-Z0-9_-]/g, '')
   const reducedMotion = useReducedMotion()
@@ -98,12 +89,6 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
   }, [phase])
 
   useEffect(() => {
-    if (phase !== 'loading' || reducedMotion) return
-    const interval = window.setInterval(() => setTipIndex((index) => (index + 1) % LOADING_TIPS.length), 1600)
-    return () => window.clearInterval(interval)
-  }, [phase, reducedMotion])
-
-  useEffect(() => {
     if (phase !== 'ready' && phase !== 'exiting') return
     const delay = reducedMotion ? 0 : phase === 'ready' ? HOLD_AT_100_MS : EXIT_DURATION_MS
     const timeout = window.setTimeout(() => setPhase(phase === 'ready' ? 'exiting' : 'done'), delay)
@@ -122,27 +107,23 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
   const exiting = phase === 'exiting'
 
   return (
-    <div role="status" aria-live="polite" aria-label="Carregando Reservai" data-preloader="" className="fixed inset-0 z-[100] overflow-hidden">
-      <span className="sr-only">Preparando o Reservai. Aguarde um momento.</span>
+    <div role="status" aria-live="polite" aria-label="Carregando Reservaí" data-preloader="" className="fixed inset-0 z-[100] overflow-hidden">
+      <span className="sr-only">Preparando o Reservaí. Aguarde um momento.</span>
       {[
         { color: '#fee2e2', delay: 260 },
         { color: '#ED1C24', delay: 130 },
-        { color: '#0c0a09', delay: 0 },
+        { color: '#faf8f7', delay: 0 },
       ].map(({ color, delay }) => (
         <div key={color} aria-hidden="true" className="absolute inset-0 transition-transform duration-[1100ms] ease-[cubic-bezier(0.76,0,0.24,1)] motion-reduce:transition-none" style={{ transform: exiting ? 'translateY(115%)' : 'translateY(0)', transitionDelay: reducedMotion ? '0ms' : `${delay}ms` }}>
           <div className="absolute inset-0" style={{ backgroundColor: color }} />
           <svg className="absolute inset-x-0 bottom-[calc(100%-1px)] h-[14vh] w-full" preserveAspectRatio="none" viewBox="0 0 1440 200"><path d={WAVE_EDGE_PATH} fill={color} /></svg>
           {delay === 0 && (
-            <div className={cn('relative flex h-full w-full flex-col items-center justify-center gap-10 px-6 transition-opacity duration-300 motion-reduce:transition-none', exiting ? 'opacity-0' : 'opacity-100')}>
+            <div className={cn('relative flex h-full w-full items-center justify-center px-6 transition-opacity duration-300 motion-reduce:transition-none', exiting ? 'opacity-0' : 'opacity-100')}>
               <svg className="w-[min(78vw,850px)] overflow-visible" fill="none" preserveAspectRatio="xMidYMid meet" viewBox={BRAND_MARK_VIEWBOX}>
                 <defs><clipPath id={clipId}><rect x="0" width={BRAND_MARK_WIDTH} y={BRAND_MARK_HEIGHT * (1 - fill)} height={BRAND_MARK_HEIGHT * fill} /></clipPath></defs>
-                <g clipPath={`url(#${clipId})`}>{BRAND_MARK_PATHS.map((d, index) => <path key={index} d={d} fill="white" fillRule="evenodd" />)}</g>
+                <g clipPath={`url(#${clipId})`}>{BRAND_MARK_PATHS.map((d, index) => <path key={index} d={d} fill={index === 0 ? '#ED1C24' : '#1c1f23'} fillRule="evenodd" />)}</g>
                 {BRAND_MARK_PATHS.map((d, index) => <path key={index} d={d} stroke="#ED1C24" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} fillRule="evenodd" pathLength={1} style={{ strokeDasharray: 1, strokeDashoffset: 1 - draw, opacity: strokeOpacity }} />)}
               </svg>
-              <div className="flex flex-col items-center gap-3">
-                <p className="text-sm font-semibold tracking-[0.25em] text-white tabular-nums">{Math.floor(progress)}<span className="text-[#ED1C24]">%</span></p>
-                <p key={tipIndex} className="animate-in fade-in text-center text-xs font-medium tracking-[0.2em] text-stone-400 uppercase duration-500 motion-reduce:animate-none">{LOADING_TIPS[tipIndex]}</p>
-              </div>
             </div>
           )}
         </div>

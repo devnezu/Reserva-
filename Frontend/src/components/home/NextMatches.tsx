@@ -3,6 +3,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowUpRight01Icon, Calendar03Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { featuredMatch, matches } from './matches'
+import TeamName from './TeamName'
 
 export default function NextMatches() {
   return (
@@ -20,10 +21,10 @@ export default function NextMatches() {
             <div className="flex flex-1 flex-col gap-6 p-6 sm:flex-row sm:items-end sm:justify-between sm:p-8">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">{match.competition}</p>
-                <h3 className="mt-2 text-2xl leading-tight font-semibold tracking-[-0.03em] uppercase">{match.home} <span className="font-light lowercase italic">x</span> {match.away}</h3>
+                <h3 className="mt-2 flex flex-wrap items-center gap-2 text-2xl leading-tight font-semibold tracking-[-0.03em] uppercase"><TeamName name={match.home} crest={match.homeCrest} /><span className="font-light lowercase italic">x</span><TeamName name={match.away} crest={match.awayCrest} /></h3>
                 <p className="mt-3 flex items-center gap-2 text-sm text-neutral-600"><HugeiconsIcon icon={Calendar03Icon} size={16} />{match.date} - {match.time}</p>
               </div>
-              <Button asChild className="h-12 shrink-0 gap-4 rounded-full px-6 text-sm font-semibold">
+              <Button asChild className="h-12 shrink-0 gap-4 rounded-full bg-[#ED1C24] px-6 text-sm font-bold tracking-wide text-white uppercase shadow-lg shadow-[#ED1C24]/30 transition-transform duration-200 hover:scale-[1.04] hover:bg-[#d0161d] active:scale-100">
                 <Link to="/acesso">Comprar ingresso <HugeiconsIcon icon={ArrowUpRight01Icon} size={18} /></Link>
               </Button>
             </div>

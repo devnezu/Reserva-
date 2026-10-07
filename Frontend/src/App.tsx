@@ -12,11 +12,11 @@ export default function App() {
     <>
       {loading && <Preloader onComplete={finishLoading} />}
       <div inert={loading} aria-hidden={loading || undefined}>
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/acesso" element={<Access />} />
-      <Route path="/helloworld" element={<HelloWorld />} />
-    </Routes>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/acesso" element={<Access />} />
+          <Route path="/helloworld" element={<HelloWorld />} />
+        </Routes>
       </div>
     </>
   )
