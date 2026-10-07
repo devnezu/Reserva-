@@ -1,5 +1,7 @@
+Member:
 Email: dry1@reservai.com
 Senha: dryedemais123
 
+Admin:
 Email: dry2@reservai.com
 Senha: dryedemais321
