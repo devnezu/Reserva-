@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @theme {
   --color-background: var(--background);
@@ -40,4 +41,77 @@
   --input: #e4dfdc;
   --ring: #77716f;
   --radius: 0.625rem;
+}
+
+@layer utilities {
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .animate-marquee { animation: marquee 45s linear infinite; }
+
+  @keyframes mark-draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes mark-stroke-out { to { opacity: 0; } }
+  .animate-mark-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: mark-draw 750ms cubic-bezier(0.65, 0, 0.35, 1) forwards,
+      mark-stroke-out 240ms ease 900ms forwards;
+  }
+
+  @keyframes mark-ink {
+    from { clip-path: inset(100% 0 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+  .animate-mark-ink {
+    clip-path: inset(100% 0 0 0);
+    animation: mark-ink 620ms cubic-bezier(0.65, 0, 0.35, 1) 520ms forwards;
+  }
+
+  @keyframes mark-head-in {
+    from { opacity: 0; transform: translateY(80px) rotate(-6deg) scale(0.92); }
+    35% { opacity: 1; }
+    to { opacity: 1; transform: none; }
+  }
+  .animate-mark-head {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: mark-head-in 660ms cubic-bezier(0.22, 1, 0.36, 1) 540ms both;
+  }
+
+  @keyframes result-in {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+  .animate-result-in { animation: result-in 460ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  @keyframes admin-drawer-in {
+    from { opacity: 0; transform: translateX(2.5rem); }
+    to { opacity: 1; transform: none; }
+  }
+  .animate-admin-drawer-in { animation: admin-drawer-in 360ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-marquee { animation: none; }
+    .animate-mark-draw,
+    .animate-mark-ink,
+    .animate-mark-head,
+    .animate-result-in,
+    .animate-admin-drawer-in {
+      animation-duration: 1ms;
+      animation-delay: 0ms;
+    }
+  }
+}
+
+@utility scrollbar-brand {
+  scrollbar-width: thin;
+  scrollbar-color: #ED1C24 transparent;
+  &::-webkit-scrollbar { width: 6px; height: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { border-radius: 9999px; background-color: #ED1C24; }
+  &::-webkit-scrollbar-thumb:hover { background-color: #b9141c; }
 }
