@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { ApiError, authApi, SESSION_EXPIRED_EVENT, type AuthSession } from '@/api/auth'
+import { profileApi } from '@/api/profile'
 import { AuthContext, type AuthStatus } from './auth-context'
 
 const SYNC_KEY = 'reservai:auth-sync'
@@ -44,6 +45,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback((email: string, password: string) => authenticate(() => authApi.login(email, password)), [authenticate])
   const register = useCallback((name: string, email: string, password: string) => authenticate(() => authApi.register(name, email, password)), [authenticate])
+
+  const uploadAvatar = useCallback(async (file: File) => {
+    const current = generation.current
+    const { user } = await profileApi.uploadAvatar(file)
+    if (current === generation.current && !mutation.current) {
+      setState((previous) => previous.status === 'authenticated' && previous.user?.id === user.id ? { ...previous, user } : previous)
+    } else { await refresh() }
+    syncTabs()
+  }, [refresh, syncTabs])
 
   const logout = useCallback(async () => {
     mutation.current = true
@@ -92,5 +102,5 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer)
   }, [state.expiresAt, refresh])
 
-  return <AuthContext value={{ ...state, login, register, logout, refresh }}>{children}</AuthContext>
+  return <AuthContext value={{ ...state, login, register, uploadAvatar, logout, refresh }}>{children}</AuthContext>
 }

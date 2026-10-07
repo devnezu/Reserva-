@@ -8,6 +8,7 @@ export interface AuthContextValue {
   expiresAt: number | null
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string) => Promise<void>
+  uploadAvatar: (file: File) => Promise<void>
   logout: () => Promise<void>
   refresh: () => Promise<void>
 }

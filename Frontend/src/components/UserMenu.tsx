@@ -5,15 +5,14 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowDown01Icon, ArrowRight01Icon, Cancel01Icon, Logout01Icon, Menu01Icon, UserCircleIcon } from '@hugeicons/core-free-icons'
 import { useAuth } from '@/hooks/use-auth'
+import { useGoToAgenda } from '@/hooks/use-go-to-agenda'
 import { notify } from '@/lib/notify'
 import { cn } from '@/lib/utils'
+import { UserAvatar } from '@/components/UserAvatar'
 
 const ITEM_CLASS = 'flex w-full items-center gap-3 px-5 py-3 text-left text-sm font-bold tracking-wide uppercase transition-colors hover:bg-black/5 focus-visible:bg-black/5 focus-visible:outline-none disabled:opacity-50'
 const SECTION_CLASS = 'flex w-full items-center justify-between gap-4 border-b border-white/25 py-5 text-left text-4xl leading-none font-extrabold tracking-[-0.03em] uppercase focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white'
 const ACTION_CLASS = 'flex items-center gap-3 py-3 text-base font-bold tracking-wide uppercase focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:opacity-50'
-// Foto de exemplo: ainda não existe foto de perfil no cadastro.
-const AVATAR_SRC = '/avatar-exemplo.webp'
-const AGENDA_ID = 'proximos-jogos'
 
 // No desktop é um seletor que expande para baixo; no celular vira um menu hambúrguer em tela cheia.
 export default function UserMenu() {
@@ -28,6 +27,7 @@ export default function UserMenu() {
   const reducedMotion = useReducedMotion()
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const goToAgenda = useGoToAgenda()
 
   useEffect(() => {
     if (!open) return
@@ -67,25 +67,16 @@ export default function UserMenu() {
     window.scrollTo({ top: 0, behavior: reducedMotion ? 'instant' : 'smooth' })
   }
 
-  function goToAgenda() {
+  function openAgenda() {
     setSheetOpen(false)
-    if (pathname !== '/') void navigate('/')
-    // A seção pode ainda não existir quando viemos de outra rota; espera ela aparecer.
-    let tries = 0
-    const scroll = () => {
-      const section = document.getElementById(AGENDA_ID)
-      if (section) {
-        section.focus({ preventScroll: true })
-        section.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'start' })
-      } else if (tries++ < 40) window.setTimeout(scroll, 50)
-    }
-    window.setTimeout(scroll, 50)
+    goToAgenda()
   }
 
   return (
     <>
-      <div ref={rootRef} className="relative hidden md:block">
+      <div ref={rootRef} className={cn('relative hidden', pathname !== '/conta' && 'md:block')}>
         <button type="button" aria-haspopup="menu" aria-expanded={open} aria-controls={menuId} onClick={() => setOpen((value) => !value)} className={cn('flex h-11 max-w-[16rem] items-center gap-2 px-5 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white', open ? 'rounded-t-[22px] bg-white text-[#111111]' : 'rounded-[22px] bg-white/15 text-white ring-1 ring-white/35 backdrop-blur-sm hover:bg-white/25')}>
+          <UserAvatar user={user} className="size-7 text-xs ring-1 ring-white/35" />
           <span className="truncate">Olá, {user?.name}</span>
           <HugeiconsIcon icon={ArrowDown01Icon} size={16} className={cn('shrink-0 transition-transform duration-200', open && 'rotate-180')} />
         </button>
@@ -115,7 +106,7 @@ export default function UserMenu() {
               </div>
 
               <div className="mt-6 flex items-center gap-4">
-                <img src={AVATAR_SRC} alt="" className="size-20 shrink-0 rounded-full object-cover ring-4 ring-white/35" />
+                <UserAvatar user={user} className="size-20 text-2xl ring-4 ring-white/35" />
                 <div className="min-w-0">
                   <p className="truncate text-2xl leading-tight font-extrabold tracking-[-0.03em] uppercase">Olá, {user?.name}</p>
                   <p className="mt-1 truncate text-sm text-white/85">{user?.email}</p>
@@ -124,7 +115,7 @@ export default function UserMenu() {
 
               <nav aria-label="Seções" className="mt-10 border-t border-white/25">
                 <button type="button" onClick={goHome} className={SECTION_CLASS}>Início <HugeiconsIcon icon={ArrowRight01Icon} size={28} /></button>
-                <button type="button" onClick={goToAgenda} className={SECTION_CLASS}>Agenda <HugeiconsIcon icon={ArrowRight01Icon} size={28} /></button>
+                <button type="button" onClick={openAgenda} className={SECTION_CLASS}>Agenda <HugeiconsIcon icon={ArrowRight01Icon} size={28} /></button>
               </nav>
 
               <div className="mt-auto pt-10">
