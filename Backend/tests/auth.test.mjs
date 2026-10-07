@@ -70,7 +70,9 @@ test('SQLite authentication and session lifecycle', async (suite) => {
   })
 
   await suite.test('anonymous requests are denied; login validates credentials without exposing secrets', async () => {
-    assert.equal((await me()).status, 401)
+    const anonymous = await me()
+    assert.equal(anonymous.status, 401)
+    assert.equal(anonymous.headers.get('set-cookie'), null, 'A stale session check must not erase a newer cookie')
     const invalid = await post('/api/auth/login', { email: 'dry1@reservai.com', password: 'wrong' })
     const unknown = await post('/api/auth/login', { email: 'unknown@reservai.com', password: 'wrong' })
     assert.equal(invalid.status, 401)
@@ -103,7 +105,8 @@ test('SQLite authentication and session lifecycle', async (suite) => {
     const current = await signIn('dry2@reservai.com', 'dryedemais321', old.cookie)
     assert.equal((await me(old.cookie)).status, 401)
     assert.equal((await me(current.cookie)).status, 200)
-    db.prepare('UPDATE sessions SET expires_at = ?').run(Date.now() - 1)
+    // Avoid depending on millisecond clock agreement between separate processes.
+    db.prepare('UPDATE sessions SET expires_at = ?').run(Date.now() - 60000)
     assert.equal((await me(current.cookie)).status, 401)
   })
 
