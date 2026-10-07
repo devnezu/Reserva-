@@ -72,7 +72,7 @@ cd Backend
 yarn seed
 ```
 
-O seed cria dois usuários e três eventos futuros:
+O seed cria três usuários e três eventos futuros:
 
 | Evento | Início | Preço | Capacidade |
 |---|---|---|---|
@@ -88,6 +88,7 @@ Para recomeçar do zero, pare o backend e apague os arquivos `Backend/data/app.s
 |---|---|---|---|
 | Rafael | `dry1@reservai.com` | `dryedemais123` | usuário |
 | Gustavo | `dry2@reservai.com` | `dryedemais321` | administrador |
+| Member | `dry3@reservai.com` | `dryedemais321` | usuário |
 
 São dados fictícios, criados pelo seed.
 

@@ -57,13 +57,15 @@ test('SQLite authentication and session lifecycle', async (suite) => {
     return { cookie: response.headers.get('set-cookie').split(';')[0], response, body: await response.json() }
   }
 
-  await suite.test('seed creates exactly two users with Argon2id hashes and reruns safely', async () => {
+  await suite.test('seed creates exactly three users with Argon2id hashes and reruns safely', async () => {
     const users = db.prepare('SELECT * FROM users ORDER BY email').all()
-    assert.equal(users.length, 2)
-    assert.deepEqual(users.map((user) => user.name), ['Rafael', 'Gustavo'])
+    assert.equal(users.length, 3)
+    assert.deepEqual(users.map((user) => user.name), ['Rafael', 'Gustavo', 'Member'])
     assert.ok(users.every((user) => user.password_hash.startsWith('$argon2id$')))
     assert.ok(await verify(users[0].password_hash, 'dryedemais123'))
     assert.ok(await verify(users[1].password_hash, 'dryedemais321'))
+    assert.ok(await verify(users[2].password_hash, 'dryedemais321'))
+    assert.equal(users[2].role, 'user')
     await stopServer(server)
     server = await startServer()
     assert.deepEqual(db.prepare('SELECT * FROM users ORDER BY email').all(), users)

@@ -30,7 +30,7 @@ test('Seed can be repeated without duplicating or overwriting existing records',
   let db
   suite.after(() => db?.close())
 
-  await suite.test('four independent seed processes on a fresh database create only two users and three events', async () => {
+  await suite.test('four independent seed processes on a fresh database create only three users and three events', async () => {
     const results = await Promise.allSettled(Array.from({ length: 4 }, () => runSeed(databasePath)))
     for (const result of results) assert.equal(result.status, 'fulfilled', result.status === 'rejected' ? result.reason.message : undefined)
     db = new Database(databasePath)
@@ -39,6 +39,7 @@ test('Seed can be repeated without duplicating or overwriting existing records',
     const users = db.prepare('SELECT email, role, password_hash FROM users ORDER BY email').all()
     assert.deepEqual(users.map(({ email, role }) => ({ email, role })), [
       { email: 'dry1@reservai.com', role: 'user' }, { email: 'dry2@reservai.com', role: 'admin' },
+      { email: 'dry3@reservai.com', role: 'user' },
     ])
     assert.ok(users.every((user) => user.password_hash.startsWith('$argon2id$')))
     const events = db.prepare('SELECT seed_key, capacity, starts_at FROM events ORDER BY seed_key').all()
@@ -69,7 +70,7 @@ test('Seed can be repeated without duplicating or overwriting existing records',
     const results = await Promise.allSettled(Array.from({ length: 4 }, () => runSeed(databasePath)))
     for (const result of results) assert.equal(result.status, 'fulfilled', result.status === 'rejected' ? result.reason.message : undefined)
     assert.deepEqual(snapshot(db), before)
-    assert.equal(db.prepare('SELECT COUNT(*) AS total FROM users').get().total, 3)
+    assert.equal(db.prepare('SELECT COUNT(*) AS total FROM users').get().total, 4)
     assert.equal(db.prepare('SELECT COUNT(*) AS total FROM events').get().total, 4)
   })
 

@@ -83,7 +83,7 @@ test('Event-page migration upgrades existing data without replacing user edits o
     db.prepare("UPDATE events SET content = '' WHERE id = 1").run()
     await seed()
     await seed()
-    assert.equal(db.prepare('SELECT COUNT(*) AS total FROM users').get().total, 2)
+    assert.equal(db.prepare('SELECT COUNT(*) AS total FROM users').get().total, 3)
     assert.equal(db.prepare('SELECT COUNT(*) AS total FROM events').get().total, 4)
     assert.equal((await get('spfc-vitoria')).content, '')
     assert.equal((await get('spfc-vitoria')).unitPriceCents, 4250)

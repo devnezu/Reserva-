@@ -6,6 +6,7 @@ import { legacyEventContent } from './event-content.js'
 const users = [
   { name: 'Rafael', email: 'dry1@reservai.com', password: 'dryedemais123', role: 'user' },
   { name: 'Gustavo', email: 'dry2@reservai.com', password: 'dryedemais321', role: 'admin' },
+  { name: 'Member', email: 'dry3@reservai.com', password: 'dryedemais321', role: 'user' },
 ]
 
 export async function seed() {
