@@ -38,6 +38,33 @@ test('Server clock boundaries and expiry without a worker', async (suite) => {
     assert.equal(value.reservation.status, 'EXPIRADA')
     assert.equal(inventory(event, now).reservedCount, count)
   })
+  await suite.test('another user reserves the released tickets exactly at expiresAt and after it', () => {
+    // Evento do seed com capacidade 2: quem segura os dois ingressos bloqueia qualquer outra reserva.
+    const scarce = database.prepare("SELECT id FROM events WHERE seed_key = 'demo-pop'").get().id
+    const other = database.prepare("SELECT id FROM users WHERE email = 'dry2@reservai.com'").get().id
+    const status = (id) => database.prepare('SELECT status FROM reservations WHERE id = ?').get(id).status
+    const held = reservations.create(user, scarce, 2, randomUUID(), () => now).body.reservation
+    assert.equal(inventory(scarce, now).available, 0)
+
+    const early = reservations.create(other, scarce, 2, randomUUID(), () => held.expiresAt - 1)
+    assert.equal(early.status, 409); assert.equal(early.body.code, 'INSUFFICIENT_CAPACITY')
+
+    const atLimit = reservations.create(other, scarce, 2, randomUUID(), () => held.expiresAt)
+    assert.equal(atLimit.status, 201); assert.equal(atLimit.body.reservation.status, 'PENDENTE')
+    assert.equal(status(held.id), 'EXPIRADA')
+    assert.equal(reservations.get(user, held.id, () => held.expiresAt).reservation.status, 'EXPIRADA')
+    const refused = reservations.transition(user, held.id, 'confirm', randomUUID(), () => held.expiresAt)
+    assert.equal(refused.status, 409); assert.equal(refused.body.code, 'RESERVATION_EXPIRED')
+    assert.equal(inventory(scarce, held.expiresAt).available, 0)
+
+    const later = atLimit.body.reservation.expiresAt + 60000
+    const afterLimit = reservations.create(user, scarce, 2, randomUUID(), () => later)
+    assert.equal(afterLimit.status, 201)
+    assert.equal(status(atLimit.body.reservation.id), 'EXPIRADA')
+    const occupied = database.prepare("SELECT COALESCE(SUM(quantity), 0) AS total FROM reservations WHERE event_id = ? AND (status = 'CONFIRMADA' OR (status = 'PENDENTE' AND expires_at > ?))").get(scarce, later).total
+    assert.equal(occupied, 2)
+    assert.equal(inventory(scarce, later).available, 0)
+  })
   await suite.test('an idempotent retry after expiry returns the same expired reservation without a new hold', () => {
     const key = randomUUID()
     const initial = reservations.create(user, event, 1, key, () => now).body.reservation

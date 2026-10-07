@@ -58,7 +58,5 @@ Backend/data/*
 Thumbs.db
 Desktop.ini
 
-# yarn.lock deve ser versionado em Backend e Frontend.
-Backend/yarn.lock
-Frontend/yarn.lock
+# yarn.lock é versionado em Backend e Frontend (não ignorar).
 Teste_React_Node_Pleno_Mais_IA.pdf
